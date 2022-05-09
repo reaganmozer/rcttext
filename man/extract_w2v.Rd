@@ -4,15 +4,14 @@
 \alias{extract_w2v}
 \title{Compute document-level feature vectors from a pre-trained embedding model.}
 \usage{
-extract_w2v(x, glove = TRUE, dim = c(50, 100, 200, 300), model = NULL)
+extract_w2v(x, glove = TRUE, dim = 50, model = NULL)
 }
 \arguments{
 \item{x}{A \link{corpus()} object or character vector of text documents.}
 
 \item{glove}{Logical.  True means use pre-trained GloVe embedding model.}
 
-\item{dim}{Dimension(s) of the pre-trained GloVe embedding model. Ignored if
-\code{glove=FALSE}.}
+\item{dim}{Dimension(s) of the pre-trained GloVe embedding model; allowed values are 50 (default), 100, 200, and 300}
 
 \item{model}{User-specified model object pointing to a custom pre-trained
 Word2Vec model.}

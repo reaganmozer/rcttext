@@ -12,7 +12,7 @@
 #' @import tm
 #' @import caret
 #'
-#' @param text A \link{corpus} object or character vector of text documents.
+#' @param x A \link{corpus} object or character vector of text documents.
 #' @param lex Logical, indicating whether to compute lexical indices including measures of lexical diversity, readability,
 #' and entropy
 #' @param sent Logical, indicating whether to compute sentiment analysis features from available dictionaries
@@ -27,14 +27,14 @@
 #' }
 #' @export
 
-tada <- function(text, lex=TRUE, sent=TRUE,
+tada <- function(x, lex=TRUE, sent=TRUE,
                  ld="all", read=c('ARI','Coleman','DRP','ELF',
                                   'Flesch','Flesch.Kincaid','meanWordSyllables'),
                  terms = NULL,
                  preProc=list(uniqueCut=1, freqCut=99/1, cor=0.95, remove.lc=TRUE)){
 
-  raw = text
-  clean = tm::removeNumbers(clean_txt(text))
+  raw = x
+  clean = tm::removeNumbers(clean_txt(raw))
 
   tok.clean = quanteda::tokens(clean)
   dfm.clean = quanteda::dfm(tok.clean)
@@ -42,10 +42,11 @@ tada <- function(text, lex=TRUE, sent=TRUE,
   all.feats=data.frame()
 
   if (lex){
-  ld = quanteda.textstats::textstat_lexdiv(dfm.clean, measure=ld)
-  read = quanteda.textstats::textstat_readability(raw, measure=read, intermediate = F)
-  ent = quanteda.textstats::textstat_entropy(dfm.clean, margin="documents")
-  all.feats = cbind(ld[,-c(1)], read[,-c(1)], ent[,-c(1)])
+  f.ld = quanteda.textstats::textstat_lexdiv(dfm.clean, measure=ld, remove_numbers=F, remove_punct=T,
+                                             remove_symbols=F)
+  f.read = quanteda.textstats::textstat_readability(raw, measure=read, intermediate = F)
+  f.ent = quanteda.textstats::textstat_entropy(dfm.clean, margin="documents")
+  all.feats = cbind(f.ld[,-c(1)], f.read[,-c(1)], f.ent[,-c(1)])
   }
 
   if (sent){
@@ -85,12 +86,11 @@ tada <- function(text, lex=TRUE, sent=TRUE,
   all.feats = cbind(all.feats, add)
   }
 
-  nchar = sapply(1:length(text), function(x) nchar(clean))
-  all.feats$WCperChar = all.feats$WC/nchar
+  all.feats$WCperChar = all.feats$WC/nchar(clean)
 
 
 
-  if (preProc$remove.lc){
+  if (preProc$remove.lc==TRUE){
     lc=caret::findLinearCombos(all.feats)
     if (!is.null(lc$remove)){
       all.feats = all.feats[,-c(lc$remove)]
@@ -100,7 +100,7 @@ tada <- function(text, lex=TRUE, sent=TRUE,
   out = all.feats[,-c(nz)]
 
   cor = caret::findCorrelation(cor(out), cutoff=preProc$cor)
-  out = all.feats[,-c(cor)]
+  out = out[,-c(cor)]
 
   if (!is.null(terms)){
   dfm.freq = quanteda::dfm(quanteda::tokens(clean_txt(raw)))
@@ -109,8 +109,10 @@ tada <- function(text, lex=TRUE, sent=TRUE,
     tmp = as.data.frame(tmp); rownames(tmp)=NULL
     names(tmp)=terms
     }
-  }
   out = as.data.frame(cbind(out, tmp))
+
+  }
+
   return(out)
 
 

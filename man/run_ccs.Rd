@@ -3,15 +3,15 @@
 \name{run_ccs}
 \alias{run_ccs}
 \alias{cluster.threshold.C}
-\title{Perform Concise Comparative Summarization}
+\title{Perform Concise Comparative Summarization across a grid of tuning parameters}
 \usage{
-run_ccs(x, z, ...)
+run_ccs(x, Z, clusterID = NULL)
 
-cluster.threshold.C(
+\method{cluster}{threshold.C}(
   x,
   z,
   design = c("crd", "multi", "cluster", "rcbd"),
-  clusterID,
+  clusterID = NULL,
   siteID = NULL,
   R,
   ...
@@ -20,20 +20,18 @@ cluster.threshold.C(
 \arguments{
 \item{x}{a corpus, character vector of text documents, or set of text features.}
 
-\item{z}{an indicator for treatment assignment}
+\item{Z}{an indicator for treatment assignment}
 
-\item{...}{additional arguments passed to \link{textreg()}.}
+\item{clusterID}{vector of cluster ID's}
 
 \item{design}{Type of design used for random assignment (complete
 randomization, multisite randomized, cluster randomized, and blocked and cluster randomized).}
-
-\item{clusterID}{vector of cluster ID's}
 
 \item{siteID}{vector of block ID's}
 
 \item{R}{Number of times to scramble treatment assignment labels}
 
-\item{C}{The regularization term. 0 is no regularization.}
+\item{...}{additional arguments passed to \link{textreg()}.}
 }
 \value{
 a \link{textreg.result()} object.
