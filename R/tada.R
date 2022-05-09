@@ -18,7 +18,7 @@
 #' @param sent Logical, indicating whether to compute sentiment analysis features from available dictionaries
 #' @param ld character vector defining lexical diversity measures to compute; see \link{quanteda.textstats::textstat_lexdiv()}
 #' @param read character vector defining readability measures to compute; see \link{quanteda.textstats::textstat_readability()}
-#' @param terms character vector of terms to evaluate for frequency (treated as standalone features)
+#' @param terms character vector of terms to evaluate as standalone features based on document-level frequency (case-insensitive)
 #' @param preProc Named list of arguments passed to \code{caret::preProcess()} for applying pre-processing transformations across the set of text features (e.g., removing collinear features)
 #' @param ... (optional) additional arguments passed to \link{quanteda::tokens()} for text pre-processing.
 #' @return A matrix of available text features, one row per document, one column per feature.
@@ -36,16 +36,15 @@ tada <- function(text, lex=TRUE, sent=TRUE,
   raw = text
   clean = tm::removeNumbers(clean_txt(text))
 
-  tok.raw = quanteda::tokens(raw)
   tok.clean = quanteda::tokens(clean)
-
+  dfm.clean = quanteda::dfm(tok.clean)
 
   all.feats=data.frame()
 
   if (lex){
-  ld = quanteda.textstats::textstat_lexdiv(quanteda::dfm(tok.clean), measure=ld)
+  ld = quanteda.textstats::textstat_lexdiv(dfm.clean, measure=ld)
   read = quanteda.textstats::textstat_readability(raw, measure=read, intermediate = F)
-  ent = quanteda.textstats::textstat_entropy(quanteda::dfm(tok.clean), margin="documents")
+  ent = quanteda.textstats::textstat_entropy(dfm.clean, margin="documents")
   all.feats = cbind(ld[,-c(1)], read[,-c(1)], ent[,-c(1)])
   }
 
@@ -86,6 +85,11 @@ tada <- function(text, lex=TRUE, sent=TRUE,
   all.feats = cbind(all.feats, add)
   }
 
+  nchar = sapply(1:length(text), function(x) nchar(clean))
+  all.feats$WCperChar = all.feats$WC/nchar
+
+
+
   if (preProc$remove.lc){
     lc=caret::findLinearCombos(all.feats)
     if (!is.null(lc$remove)){
@@ -97,6 +101,16 @@ tada <- function(text, lex=TRUE, sent=TRUE,
 
   cor = caret::findCorrelation(cor(out), cutoff=preProc$cor)
   out = all.feats[,-c(cor)]
+
+  if (!is.null(terms)){
+  dfm.freq = quanteda::dfm(quanteda::tokens(clean_txt(raw)))
+  tmp=as.matrix(dfm.freq)[,which(colnames(dfm.freq)%in%terms)]
+    if (length(terms) == 1){
+    tmp = as.data.frame(tmp); rownames(tmp)=NULL
+    names(tmp)=terms
+    }
+  }
+  out = as.data.frame(cbind(out, tmp))
   return(out)
 
 
