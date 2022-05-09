@@ -31,7 +31,7 @@ tada <- function(text, lex=TRUE, sent=TRUE,
                  ld="all", read=c('ARI','Coleman','DRP','ELF',
                                   'Flesch','Flesch.Kincaid','meanWordSyllables'),
                  terms = NULL,
-                 preProc=list(uniqueCut=1, cor=0.9, remove.lc=TRUE)){
+                 preProc=list(uniqueCut=1, freqCut=99/1, cor=0.95, remove.lc=TRUE)){
 
   raw = text
   clean = tm::removeNumbers(clean_txt(text))
@@ -86,7 +86,17 @@ tada <- function(text, lex=TRUE, sent=TRUE,
   all.feats = cbind(all.feats, add)
   }
 
-  out = caret::preProcess(all.feats, method=c("corr","nzv"), uniqueCut=uniqueCut, cutoff=cor)
+  if (preProc$remove.lc){
+    lc=caret::findLinearCombos(all.feats)
+    if (!is.null(lc$remove)){
+      all.feats = all.feats[,-c(lc$remove)]
+    }
+  }
+  nz = caret::nearZeroVar(all.feats, uniqueCut=preProc$uniqueCut, freqCut=preProc$freqCut)
+  out = all.feats[,-c(nz)]
+
+  cor = caret::findCorrelation(cor(out), cutoff=preProc$cor)
+  out = all.feats[,-c(cor)]
   return(out)
 
 
