@@ -1,0 +1,37 @@
+,x,fname
+1,achieve,Achievement
+2,adj,Adjectives
+3,affect,Affect
+4,affiliation,Affiliation
+5,Analytic,Analytical thinking
+6,assent,Assent
+7,Authentic,Authenticity
+8,cause,Causation
+9,Clout,Clout
+10,cogproc,Cognitive proc.
+11,conj,Conjunctions
+12,Dic,Dictionary
+13,discrep,Discrepancy
+14,drives,Drives
+15,family,Family
+16,female,Female
+17,Flesch.Kincaid,Readability
+18,focuspast,Focus on past
+19,leisure,Leisure
+20,male,Male
+21,motion,Motion
+22,posemo,Positive emotion
+23,QMark,Question marks
+24,risk,Risk
+25,Sixltr,Six+ letter terms
+26,social,Social proc.
+27,tentat,Tentative
+28,Tone,Emotional tone
+29,TTR,Type-token ratio
+30,WC,Word count
+31,WPS,Words per sentence
+32,XXX,Illegible terms
+33,pronoun_density,Pronoun density
+40,interrog,Interrogatives
+41,all_demonstratives,Demonstratives
+42,informal,Informal language

@@ -1,0 +1,472 @@
+\documentclass[a4paper]{book}
+\usepackage[times,inconsolata,hyper]{Rd}
+\usepackage[utf8]{inputenc} % @SET ENCODING@
+% \usepackage{graphicx} % @USE GRAPHICX@
+\begin{document}
+\chapter*{}
+\begin{center}
+{\textbf{\huge Package `tada'}}
+\par\bigskip{\large \today}
+\end{center}
+\begin{description}
+\raggedright{}
+\inputencoding{utf8}
+\item[Title]\AsIs{Tools for impact analysis in randomized trials with text outcomes}
+\item[Version]\AsIs{0.0.0.9000}
+\item[Description]\AsIs{A flexible and user-friendly toolkit for performing impact analysis in randomized trials with outcomes generated through human, machine, and/or hybrid scoring of text data. Provides functionality  for feature extraction and aggregation,  applying supervised and unsupervised machine learning models for semi-automated text scoring, estimating model-assisted treatment impacts with respect to text outcomes under various randomized designs, visually representing found impacts on text outcomes, and additional functionality for performing text analysis using existing frameworks, especially quanteda.}
+\item[Encoding]\AsIs{UTF-8}
+\item[Imports]\AsIs{quanteda,
+textreg,
+sampling,}
+\item[RdMacros]\AsIs{Rdpack}
+\item[RoxygenNote]\AsIs{7.1.1}
+\end{description}
+\Rdcontents{\R{} topics documented:}
+\inputencoding{utf8}
+\HeaderA{estimate\_impacts}{Estimate treatment impacts for hybrid-scored text outcomes}{estimate.Rul.impacts}
+%
+\begin{Description}\relax
+Given text from a randomized trial with a binary treatment, where a subset of
+the documents have been human-scored, this function computes model-assisted
+estimates for the average treatment effect with respect to the human-coded
+outcome.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+estimate_impacts(
+  y.obs,
+  yhat,
+  Z,
+  wts = NULL,
+  design = c("crd", "multi", "cluster", "rcbd"),
+  siteID = NULL,
+  clusterID = NULL,
+  data,
+  adjust = NULL
+)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{y.obs}] A vector of human-coded scores (with NAs for unscored documents).
+
+\item[\code{yhat}] A vector of predicted scores estimated via \code{predict\_scores}.
+
+\item[\code{Z}] Indicator for treatment assignment.
+
+\item[\code{wts}] Sampling weights for which documents were human scored.  Assumed uniform if null.
+
+\item[\code{design}] Type of design used for random assignment (complete
+randomization, multisite randomized, cluster randomized, and blocked and cluster randomized).
+
+\item[\code{siteID}] Vector of IDs for site, for multi-site randomized experiments.
+
+\item[\code{clusterID}] Vector of IDs for cluster, for cluster-randomized experiments.
+
+\item[\code{data}] A \code{data.frame} of subject-level identifiers, demographic
+variables, group membership, and/or other pre-treatment covariates.
+
+\item[\code{adjust}] (optional) character vector or named list of variables in the data matrix to
+adjust for when estimating treatment impacts.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A model object for estimating treatment impact across an array of features.
+\end{Value}
+\inputencoding{utf8}
+\HeaderA{extract\_features}{Generate an array of text features}{extract.Rul.features}
+%
+\begin{Description}\relax
+Generates a rich feature representation for documents provided as a character vector or \LinkA{quanteda::corpus()}{quanteda::corpus()} object
+by applying an array of linguistic and syntactic indices, available text analysis dictionaries,
+and pre-trained embedding models to all documents.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+extract_features(x, p_max = NULL, glove = c(300, 200, 100, 50), ...)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{x}] A \LinkA{corpus}{corpus} object or character vector of text documents.
+
+\item[\code{p\_max}] The maximum number of features to compute. Defaults to \code{NULL} (no strict limit).
+
+\item[\code{glove}] Number of Word2Vec components to compute using GloVe pre-trained embedding model (Pennington et al. 2014).
+Defaults to 300.
+
+\item[\code{...}] (optional) additional arguments passed to \LinkA{tokens()}{tokens()} for text pre-processing.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A matrix of available text features, one row per document, one column per feature.
+\end{Value}
+%
+\begin{References}\relax
+
+Pennington J, Socher R, Manning C (2014).
+``Glove: Global vectors for word representation.''
+In \emph{Proceedings of the 2014 conference on empirical methods in natural language processing (EMNLP)}, 1532--1543.
+
+\end{References}
+\inputencoding{utf8}
+\HeaderA{extract\_taaco}{Manage and merge text features generated using TAACO}{extract.Rul.taaco}
+\aliasA{prep\_taaco}{extract\_taaco}{prep.Rul.taaco}
+%
+\begin{Description}\relax
+Tools to support feature extraction using TAACO.
+\code{prep\_taaco()} prepares a corpus for analysis in TAACO.
+\code{extract\_taaco()} reads output and log files produced by TAACO program and returns a \code{data.frame} that can be merged with other feature sets.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+extract_taaco(file, data = NULL, idvar = NULL)
+
+prep_taaco(x, dir, docnames = NULL)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{file}] Filename where TAACO results are stored
+
+\item[\code{data}] Optional \code{data.frame} with additional document-level variables to include in output.
+
+\item[\code{idvar}] If \code{data} is specified, character vector with name(s) of variables used for merging.
+
+\item[\code{x}] A [quanteda::corpus()] object or character vector of text documents.
+
+\item[\code{dir}] Name of directory where TAACO intermediate text files should be stored.
+
+\item[\code{docnames}] Optional character string specifying file names for each document in \code{x}.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+Returns a \code{data.frame} of text features.
+\end{Value}
+\inputencoding{utf8}
+\HeaderA{plot\_impacts}{Plot the results from an impact analysis with text outcomes}{plot.Rul.impacts}
+%
+\begin{Description}\relax
+This function provides a visualization of the set of textual features
+found to differ systematically between treatment and control groups.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+plot_impacts(x, alpha = 0.05, ...)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{x}] a model object output from \code{estimate\_impacts()}
+
+\item[\code{alpha}] the threshold for determining statistical significance
+
+\item[\code{...}] additional arguments passed to plotting method.
+\end{ldescription}
+\end{Arguments}
+\inputencoding{utf8}
+\HeaderA{predict\_scores}{Extract predictions from a fitted text scoring model.}{predict.Rul.scores}
+%
+\begin{Description}\relax
+This function computes the predicted scores for a collection of documents based on the
+results of a trained ensemble learner.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+predict_scores(fit, newdata, na.action = na.omit, ...)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{fit}] a model or list of models to use for prediction
+
+\item[\code{newdata}] an optional data frame or matrix of predictors
+
+\item[\code{na.action}] the method for handling missing data
+
+\item[\code{...}] additional arguments to pass to \code{predict.train}
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A vector of predictions
+\end{Value}
+\inputencoding{utf8}
+\HeaderA{prep\_external}{Prepare text documents for analysis using external programs}{prep.Rul.external}
+%
+\begin{Description}\relax
+Text pre-processing and corpus management functions to provide compatibility
+with external text analysis programs and standalone software packages such as
+Linguistic Inquiry Word Count (LIWC), the Tool for Automated Analysis of
+Cohesion (TAACO) and the Sentiment Analysis and Social Cognition Engine (SEANCE).
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+prep_external(x, dir, docnames = NULL, preProc = NULL)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{x}] A \LinkA{corpus}{corpus} object or character vector of text documents.
+
+\item[\code{dir}] Name of directory where TAACO intermediate text files should be
+stored.
+
+\item[\code{docnames}] Optional character string specifying file names for each
+document in \code{x}.
+
+\item[\code{preProc}] Optional text pre-processing function(s) (e.g., stemming) to apply prior to writing text files
+for analysis in external programs.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{References}\relax
+ Pennebaker JW, Booth RJ, Boyd RL, Francis ME (2015).
+``Linguistic Inquiry and Word Count: LIWC 2015.''
+www.liwc.net.
+Crossley SA, Kyle K, McNamara DS (2016).
+``The tool for the automatic analysis of text cohesion (TAACO): Automatic assessment of local, global, and text cohesion.''
+\emph{Behavior research methods}, \bold{48}(4), 1227--1237.
+Crossley SA, Kyle K, McNamara DS (2017).
+``Sentiment Analysis and Social Cognition Engine (SEANCE): An automatic tool for sentiment, social cognition, and social-order analysis.''
+\emph{Behavior research methods}, \bold{49}(3), 803--821.
+\end{References}
+\inputencoding{utf8}
+\HeaderA{run\_ccs}{Perform Concise Comparative Summarization}{run.Rul.ccs}
+\aliasA{cluster.threshold.C}{run\_ccs}{cluster.threshold.C}
+%
+\begin{Description}\relax
+Wrapper for \LinkA{textreg::textreg()}{textreg::textreg()}.
+
+Determine the penalty C that will zero out the textreg model for a series of
+randomly permuted labelings with random assignment dictated by a blocked and
+cluster-randomized experiment.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+run_ccs(x, z, ...)
+
+cluster.threshold.C(
+  x,
+  z,
+  design = c("crd", "multi", "cluster", "rcbd"),
+  clusterID,
+  siteID = NULL,
+  R,
+  ...
+)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{x}] a corpus, character vector of text documents, or set of text features.
+
+\item[\code{z}] an indicator for treatment assignment
+
+\item[\code{...}] additional arguments passed to \LinkA{textreg()}{textreg()}.
+
+\item[\code{design}] Type of design used for random assignment (complete
+randomization, multisite randomized, cluster randomized, and blocked and cluster randomized).
+
+\item[\code{clusterID}] vector of cluster ID's
+
+\item[\code{siteID}] vector of block ID's
+
+\item[\code{R}] Number of times to scramble treatment assignment labels
+
+\item[\code{C}] The regularization term. 0 is no regularization.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Details}\relax
+Method repeatedly generates +1/-1 vectors within the given blocking structure
+with blocks of +1/-1 within the clustering vector, and then finds a threshold
+C for each permutation.
+\end{Details}
+%
+\begin{Value}
+a \LinkA{textreg.result()}{textreg.result()} object.
+
+List of numbers.  First is the threshold C for the passed labeling.
+Remainder are the reference distribution based on the permutations.
+\end{Value}
+\inputencoding{utf8}
+\HeaderA{textML}{Model-assisted impact analysis through hybrid human/machine text scoring}{textML}
+%
+\begin{Description}\relax
+A wrapper function for the multiple steps of generating features, training a
+scoring model on the human-coded data, predicting scores, and comparing human
+v. machine estimates.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+textML(
+  x,
+  y,
+  z = NULL,
+  wts = NULL,
+  design = c("crd", "multi", "cluster", "rcbd"),
+  siteID = NULL,
+  clusterID = NULL,
+  max.features = NULL,
+  ...
+)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{x}] a corpus or character vector of text documents.
+
+\item[\code{y}] a vector of human-coded scores. Set elements to `NA` for documents
+not previously scored.
+
+\item[\code{z}] optional indicator for treatment assignment. If specified, separate
+ensembles will be trained for each treatment group;
+
+\item[\code{wts}] Sampling weights for which documents were human scored.  Assumed uniform if null.
+
+\item[\code{design}] Type of design used for random assignment (complete
+randomization, multisite randomized, cluster randomized, and blocked and cluster randomized).
+
+\item[\code{siteID}] Vector of IDs for site, for multi-site randomized experiments.
+
+\item[\code{clusterID}] Vector of IDs for cluster, for cluster-randomized experiments.
+
+\item[\code{max.features}] maximum number of text features to use for model
+training. Defaults to `NULL` (no strict limit)
+
+\item[\code{...}] additional arguments passed to \LinkA{train}{train}.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Details}\relax
+This function takes in a corpus of text documents (or a set of computed text
+features) along with a sample of human-coded outcome values, and trains an
+ensemble of machine learning models to predict the outcome as a function of
+the machine measures of text.
+\end{Details}
+%
+\begin{Value}
+a \code{textML} model object
+\end{Value}
+\inputencoding{utf8}
+\HeaderA{textsamp}{Select a random sample of documents}{textsamp}
+\aliasA{textsamp\_cluster}{textsamp}{textsamp.Rul.cluster}
+\aliasA{textsamp\_strata}{textsamp}{textsamp.Rul.strata}
+%
+\begin{Description}\relax
+Functions to select random samples of documents using different sampling schemes and/or
+along different design criteria.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+textsamp(
+  x,
+  size = length(x),
+  prob = NULL,
+  wt.fn = NULL,
+  scheme = NULL,
+  method = c("srswr", "srswor", "systematic", "poisson")
+)
+
+textsamp_strata(x, by = NULL, ...)
+
+textsamp_cluster(x, by = NULL, ...)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{x}] A \LinkA{corpus}{corpus} object or character vector of text documents.
+
+\item[\code{size}] a non-negative integer giving the number of documents to sample.
+
+\item[\code{prob}] a vector of probability weights for each document.
+
+\item[\code{wt.fn}] a function for generating probability weights; ignored when \code{prob} is used. See Details.
+
+\item[\code{scheme}] optional sampling scheme to implement
+
+\item[\code{method}] the following methods are implemented: simple random sampling without replacement (`srswor`),
+simple random sampling with replacement (`srswr`), Poisson sampling (`poisson`), systematic sampling (`systematic`);
+if \code{method} is missing, the default method is \code{srswor}.
+
+\item[\code{by}] a \code{data.frame} with document-level grouping variable(s) or character vector with names of variables in `docvars(x)`
+
+\item[\code{...}] additional arguments passed on to `textsamp`. Cannot include `scheme`.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+Returns a \code{data.frame} containing identifiers for the selected documents.
+\end{Value}
+\inputencoding{utf8}
+\HeaderA{train\_ensemble}{Train an ensemble learner for semi-supervised text scoring}{train.Rul.ensemble}
+%
+\begin{Description}\relax
+This function takes in a corpus of text documents or a set of computed text features, along with a sample
+of human-coded outcome values and trains an ensemble of machine learning models to predict the outcome as a
+function of machine measures of text.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+train_ensemble(
+  x,
+  y,
+  z = NULL,
+  n.tune = 3,
+  cvf = 5,
+  bounds = NULL,
+  ...,
+  return.all = TRUE
+)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{x}] a \code{data.frame} or matrix of numeric text features.
+
+\item[\code{y}] a vector of human-coded scores for the outcome of interest.
+
+\item[\code{z}] optional indicator for treatment assignment. If specified, separate ensembles will
+be trained for each treatment group;
+
+\item[\code{n.tune}] an integer denoting the amount of granularity in the tuning parameter grid.
+By default, this argument is the number of levels for each tuning parameters that should be generated by \LinkA{train}{train}.
+
+\item[\code{cvf}] number of folds for cross validation
+
+\item[\code{bounds}] a vector (y1, y2) specifying the lower and upper limits for prediction
+
+\item[\code{...}] additional arguments passed to \LinkA{trainControl}{trainControl}.
+
+\item[\code{return.all}] should all component models be returned? If `FALSE`, returns only the fitted ensemble(s).
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+a fitted model object
+\end{Value}
+\end{document}

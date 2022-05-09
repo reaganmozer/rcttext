@@ -1,0 +1,11 @@
+\contentsline {subsection}{estimate\_impacts}{ii}{page.ii}
+\contentsline {subsection}{extract\_features}{iii}{page.iii}
+\contentsline {subsection}{extract\_taaco}{iii}{page.iii}
+\contentsline {subsection}{extract\_w2v}{iv}{page.iv}
+\contentsline {subsection}{plot\_impacts}{v}{page.v}
+\contentsline {subsection}{predict\_scores}{v}{page.v}
+\contentsline {subsection}{prep\_external}{vi}{page.vi}
+\contentsline {subsection}{run\_ccs}{vi}{page.vi}
+\contentsline {subsection}{textML}{vii}{page.vii}
+\contentsline {subsection}{textsamp}{viii}{page.viii}
+\contentsline {subsection}{train\_ensemble}{ix}{page.ix}
