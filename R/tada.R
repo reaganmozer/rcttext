@@ -119,6 +119,9 @@ tada <- function(x, lex=TRUE, sent=TRUE,
 
 }
 
+#' Internal data cleaning function
+#' @keywords internal
+
 clean_txt = function(x){
   require(tm)
   tmp = gsub(".", " . ", x, fixed=TRUE)

@@ -30,4 +30,3 @@ across all words in a document.
 { \insertRef{mikolov2013efficient}{tada}
 \insertRef{pennington2014glove}{tada} }
 }
-\keyword{internal}

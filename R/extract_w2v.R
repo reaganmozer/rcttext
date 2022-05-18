@@ -18,7 +18,6 @@
 #' @references{ \insertRef{mikolov2013efficient}{tada}
 #' \insertRef{pennington2014glove}{tada} }
 #'
-#'@keywords internal
 extract_w2v <- function(x, glove=TRUE, dim=50,
                        model=NULL){
 
