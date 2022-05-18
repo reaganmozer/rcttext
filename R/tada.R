@@ -7,8 +7,8 @@
 #'
 #' @import quanteda
 #' @import quanteda.textstats
-#' @import quanteda.dictionaries
 #' @import quanteda.sentiment
+#' @import quanteda.dictionaries
 #' @import tm
 #' @import caret
 #'
@@ -52,27 +52,27 @@ tada <- function(x, lex=TRUE, sent=TRUE,
   if (sent){
   # Valence scores
 
-  dics = list(data_dictionary_AFINN, data_dictionary_ANEW, data_dictionary_sentiws)
+  dics = list(quanteda.sentiment::data_dictionary_AFINN, quanteda.sentiment::data_dictionary_ANEW, quanteda.sentiment::data_dictionary_sentiws)
   names(dics)=c("AFINN","ANEW","sentiws")
   val = do.call(cbind, lapply(dics, function(x) textstat_valence(tok.clean, dictionary=x)[,2]))
 
-  polarity(data_dictionary_LSD2015) <- list(
+  polarity(quanteda.sentiment::data_dictionary_LSD2015) <- list(
     pos = c("positive", "neg_negative"),
     neg = c("negative", "neg_positive")
   )
-  dics2 = list(data_dictionary_LSD2015, data_dictionary_NRC, data_dictionary_LoughranMcDonald)
+  dics2 = list(quanteda.sentiment::data_dictionary_LSD2015, quanteda.sentiment::data_dictionary_NRC, quanteda.sentiment::data_dictionary_LoughranMcDonald)
   pol = do.call(cbind, lapply(dics2, function(x) textstat_polarity(tok.clean, dictionary=x)[,2]))
   names(pol)=c("LSD2015","NRC","LoughranMcDonald")
 
 
   corp = quanteda::corpus(raw)
-  sent= liwcalike(corp, dictionary = data_dictionary_RID)
+  sent= liwcalike(corp, dictionary = quanteda.dictionaries::data_dictionary_RID)
   sent = sent %>% dplyr::select(WPS:OtherP)
 
-  sent1= liwcalike(corp, dictionary=data_dictionary_MFD)
+  sent1= liwcalike(corp, dictionary=quanteda.dictionaries::data_dictionary_MFD)
   sent1 = dplyr::select(sent1, care.virtue:sanctity.vice)
 
-  sent2 = liwcalike(corp, dictionary=data_dictionary_LoughranMcDonald)
+  sent2 = liwcalike(corp, dictionary=quanteda.sentiment::data_dictionary_LoughranMcDonald)
   sent2 = dplyr::select(sent2, negative:`modal words strong`)
 
   sent = cbind(sent, sent1, sent2)
