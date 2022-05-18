@@ -7,7 +7,6 @@
 #'
 #' @import quanteda
 #' @import quanteda.textstats
-#' @import quanteda.sentiment
 #' @import quanteda.dictionaries
 #' @import tm
 #' @import caret
