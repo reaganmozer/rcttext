@@ -16,19 +16,22 @@ liwc = function(file, x=NULL, by=NULL, clean=T){
     names(liwc)[ind]=liwc[1,ind]
     liwc=liwc[-c(1),]
   }
-  liwc = dplyr::select(liwc, vars(by), WC:OtherP)
+  liwc = dplyr::select(liwc, by, WC:OtherP)
 
 
   if (!is.null(x)){
-    out = merge(x, liwc,  by=by)
+    liwc2=dplyr::select(liwc, !names(liwc)[names(liwc)%in%names(x)], by)
+
+    out = merge(x, liwc2,  by=by)
   }
   else if (is.null(x)){
     out = liwc
   }
 
   if (clean){
-    lc = caret::findLinearCombos(out)
-    if (!is.null(lc)){ out = out[,-c(lc)] }
+    out2=dplyr::select(out, -by)
+    lc = caret::findLinearCombos(out2)
+    if (!is.null(lc$remove)){ out = out2[,-c(lc$remove)] }
   }
   return(out)
 
