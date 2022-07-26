@@ -1,3 +1,6 @@
+
+
+
 #' Plot the results from a CCS run
 #'
 #' This function provides a visualization of the set of words and phrases
@@ -10,9 +13,6 @@
 #' @param xadj adjustments to the lower and upper limits on the x-axis of the plot
 #' @param ... additional arguments passed to plot
 #' @export
-
-
-
 plot.ccs = function(out, xadj=c(-0.025,0.025),...){
   out1 = out
   xlim0 = round(c(min(out1$diff.val), max(out1$diff.val)),1)

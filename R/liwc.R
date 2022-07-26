@@ -6,7 +6,7 @@
 #' @param clean should LIWC output be cleaned prior to appending (e.g., remove linear combinations, repeat variables, etc.)
 #' @export
 
-liwc = function(file, x=NULL, by=NULL, clean=T){
+liwc = function(file, x=NULL, by=NULL, clean=T) {
   liwc=read.csv(file,header=T)
   tmp = dplyr::select(liwc, !WC:OtherP)
 

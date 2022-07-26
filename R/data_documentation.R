@@ -1,3 +1,6 @@
+
+
+
 #' Dataset containing word embeddings on 50 dimensions based on GloVe pre-trained embedding model
 #' @docType data
 #' @details 50-dimensional word embedding vectors for 400,000 terms and phrases based on GloVe pre-trained embedding model

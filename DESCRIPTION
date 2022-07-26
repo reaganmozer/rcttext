@@ -12,4 +12,4 @@ Imports:
     textreg,
     sampling,
 RdMacros: Rdpack
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.0
