@@ -13,8 +13,10 @@
 
 
 
-plot.ccs = function(out, xadj=c(-0.025,0.025),...){
+plot_ccs = function(out, xadj=c(-0.025,0.025),...){
   out1 = out
+
+
   xlim0 = round(c(min(out1$diff.val), max(out1$diff.val)),1)
 
   xlim = xlim0 + xadj
