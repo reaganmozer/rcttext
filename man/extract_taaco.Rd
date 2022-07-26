@@ -2,12 +2,9 @@
 % Please edit documentation in R/extract_taaco.R
 \name{extract_taaco}
 \alias{extract_taaco}
-\alias{prep_taaco}
 \title{Manage and merge text features generated using TAACO}
 \usage{
 extract_taaco(file, data = NULL, idvar = NULL)
-
-prep_taaco(x, dir, docnames = NULL)
 }
 \arguments{
 \item{file}{Filename where TAACO results are stored}
@@ -15,18 +12,11 @@ prep_taaco(x, dir, docnames = NULL)
 \item{data}{Optional \code{data.frame} with additional document-level variables to include in output.}
 
 \item{idvar}{If \code{data} is specified, character vector with name(s) of variables used for merging.}
-
-\item{x}{A [quanteda::corpus()] object or character vector of text documents.}
-
-\item{dir}{Name of directory where TAACO intermediate text files should be stored.}
-
-\item{docnames}{Optional character string specifying file names for each document in \code{x}.}
 }
 \value{
 Returns a \code{data.frame} of text features.
 }
 \description{
 Tools to support feature extraction using TAACO.
-\code{prep_taaco()} prepares a corpus for analysis in TAACO.
 \code{extract_taaco()} reads output and log files produced by TAACO program and returns a \code{data.frame} that can be merged with other feature sets.
 }
