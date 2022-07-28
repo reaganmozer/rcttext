@@ -12,10 +12,10 @@
 
 
 
-#' Dimension names of LIWC that are more accessible
+#' Dimension names of LIWC/TAACO that are more accessible
 #'
 #' @docType data
-#' @details Pretty-fied dimension names for LIWC features
+#' @details Pretty-fied dimension names for LIWC/TAACO features
 #' @keywords data
 #' @format A \link{data.frame} with 36 rows and 2 columns
 "dimnames"
