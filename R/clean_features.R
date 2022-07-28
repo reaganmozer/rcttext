@@ -35,6 +35,9 @@ clean_features <- function( meta, ignore = NULL,
     meta_aside = meta[,set_aside]
     meta = as.matrix( meta[,-set_aside] )
   }
+  else{
+    meta=as.matrix(meta)
+  }
 
   stopifnot( is.numeric(meta) )
   baddies = is.infinite(meta) | is.nan(meta) | is.na(meta)
