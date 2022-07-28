@@ -19,3 +19,20 @@
 #' @keywords data
 #' @format A \link{data.frame} with 36 rows and 2 columns
 "dimnames"
+
+
+
+
+#' Mini glove dataset
+#'
+#' glove embeddings (50 dimensional) for 1000 common words beyond
+#' those words listed in several stopword lists provided by quanteda.
+#'
+#' Original glove embeddings downloaded from Stanford CITE.
+#'
+#' @docType data
+#' @details 1000 by 50 matrix, each row is an embedding.  Rownames are
+#'   words.
+#' @keywords data
+#' @format A \link{matrix} with 1000 rows and 50 columns
+"mini_glove"

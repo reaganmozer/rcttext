@@ -3,7 +3,7 @@
 \docType{data}
 \name{dimnames}
 \alias{dimnames}
-\title{Dimension names of LIWC that are more accessible}
+\title{Dimension names of LIWC/TAACO that are more accessible}
 \format{
 A \link{data.frame} with 36 rows and 2 columns
 }
@@ -11,9 +11,9 @@ A \link{data.frame} with 36 rows and 2 columns
 dimnames
 }
 \description{
-Dimension names of LIWC that are more accessible
+Dimension names of LIWC/TAACO that are more accessible
 }
 \details{
-Pretty-fied dimension names for LIWC features
+Pretty-fied dimension names for LIWC/TAACO features
 }
 \keyword{data}

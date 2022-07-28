@@ -10,8 +10,8 @@ prep_external(x, dir, docnames = NULL, preProc = NULL)
 \item{x}{A \link{corpus} object or character vector of text
 documents.}
 
-\item{dir}{Name of directory where TAACO intermediate text files
-should be stored.}
+\item{dir}{Name of directory where the generated intermediate text
+files should be stored.}
 
 \item{docnames}{Optional character string specifying file names for
 each document in \code{x}.}

@@ -1,3 +1,13 @@
+
+
+# Unused at moment
+# #' @param dim Dimension(s) of the pre-trained GloVe embedding model;
+# #'   allowed values are 50 (default), 100, 200, and 300
+# #' @param glove Logical.  True means use pre-trained GloVe embedding
+# #'   model.
+
+
+
 #' Compute document-level feature vectors from a pre-trained embedding
 #' model.
 #'
@@ -10,13 +20,12 @@
 #'
 #' @inheritParams generate_features
 #'
-#' @param glove Logical.  True means use pre-trained GloVe embedding
-#'   model.
-#' @param dim Dimension(s) of the pre-trained GloVe embedding model;
-#'   allowed values are 50 (default), 100, 200, and 300
+
 #' @param model User-specified model object pointing to a custom
 #'   pre-trained Word2Vec model, represented as a matrix with rownames
-#'   of the words and rows being the embeddings for each word.
+#'   of the words and rows being the embeddings for each word.  If
+#'   NULL, use default "mini_glove" embeddings on 1000 common words
+#'   (not recommended).
 #' @return A list of data frames containing the Word2Vec projections
 #'   of the corpus
 #'
@@ -25,7 +34,7 @@
 #' @export
 extract_w2v <- function(x,
                         meta = NULL,
-                        glove=TRUE, dim=50,
+                        #   glove=TRUE, #dim=50,
                         model=NULL) {
 
   if ( !is.null(meta) ) {
@@ -34,32 +43,35 @@ extract_w2v <- function(x,
 
   # Loop over list of dimensions, calling ourselves to build up full
   # list
-  if ( is.null(model) && length( dim ) > 1 ) {
-    proj = meta
-    for ( d in dim ) {
-      proj = extract_w2v( x = x, meta = proj,
-                          glove = glove, dim = d, model = model )
-    }
-  }
+  # if ( is.null(model) && length( dim ) > 1 ) {
+  #   proj = meta
+  #   for ( d in dim ) {
+  #     proj = extract_w2v( x = x, meta = proj,
+  #                         glove = glove, dim = d, model = model )
+  #   }
+  # }
 
   if ( is.null(model) ) {
     # Load model if not passed
-    stopifnot( all(dim) %in% c( 50, 100, 200, 300 ) )
-
-    fname=paste0("glove.",dim,"d")
-    data(list=fname)
-    glove = get(fname)
-    stopifnot( ncol(glove) == dim )
+    # stopifnot( all(dim) %in% c( 50, 100, 200, 300 ) )
+    #
+    # fname=paste0("glove.",dim,"d")
+    # data(list=fname)
+    # glove = get(fname)
+    # stopifnot( ncol(glove) == dim )
+    data( "mini_glove" )
+    glove = mini_glove
   } else {
     glove = model
-    dim = ncol(glove)
   }
+  dim = ncol(glove)
 
-  glove = rownames_to_column(glove, var = "word")
+  glove = tibble::rownames_to_column(as.data.frame(glove),
+                                     var = "word")
 
   #glove.vocab = unique(removePunctuation(names(glove.50d)))
 
-  proj = softmaxreg::wordEmbed(essay.text, dictionary=glove, meanVec=TRUE)
+  proj = softmaxreg::wordEmbed(x, dictionary=glove, meanVec=TRUE)
   proj = as.data.frame(proj)
   names(proj) = paste0("W2V.d", 1:dim )
 

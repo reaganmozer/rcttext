@@ -26,3 +26,6 @@ tr = toy_reads %>%
 taaco = dplyr::semi_join(taaco, tr, by="Filename" )
 nrow(taaco)
 write_csv( taaco, here::here( "data/reads_taaco.csv" ) )
+
+
+

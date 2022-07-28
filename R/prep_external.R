@@ -1,3 +1,8 @@
+
+
+
+
+
 #' Prepare text documents for analysis using external programs
 #'
 #' Text pre-processing and corpus management functions to provide
@@ -8,13 +13,15 @@
 #'
 #' @param x A \link{corpus} object or character vector of text
 #'   documents.
-#' @param dir Name of directory where TAACO intermediate text files
-#'   should be stored.
+#' @param dir Name of directory where the generated intermediate text
+#'   files should be stored.
 #' @param docnames Optional character string specifying file names for
 #'   each document in \code{x}.
 #' @param preProc Optional text pre-processing function(s) (e.g.,
 #'   stemming) to apply prior to writing text files for analysis in
 #'   external programs.
+#' @import fs
+#' @import progress
 #'
 #' @references{ \insertRef{liwc2015}{tada}
 #' \insertRef{crossley2016taaco}{tada}
@@ -44,3 +51,5 @@ prep_external = function(x, dir, docnames=NULL, preProc=NULL){
   }
   pb$terminate()
 }
+
+

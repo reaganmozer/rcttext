@@ -5,7 +5,7 @@
 \title{Compute document-level feature vectors from a pre-trained embedding
 model.}
 \usage{
-extract_w2v(x, meta = NULL, glove = TRUE, dim = 50, model = NULL)
+extract_w2v(x, meta = NULL, model = NULL)
 }
 \arguments{
 \item{x}{A \link{corpus} object or character vector of text
@@ -14,15 +14,11 @@ documents.}
 \item{meta}{Dataframe corresponding to the corpus x.  If passed,
 and non-NULL, all features will be added to this dataframe.}
 
-\item{glove}{Logical.  True means use pre-trained GloVe embedding
-model.}
-
-\item{dim}{Dimension(s) of the pre-trained GloVe embedding model;
-allowed values are 50 (default), 100, 200, and 300}
-
 \item{model}{User-specified model object pointing to a custom
 pre-trained Word2Vec model, represented as a matrix with rownames
-of the words and rows being the embeddings for each word.}
+of the words and rows being the embeddings for each word.  If
+NULL, use default "mini_glove" embeddings on 1000 common words
+(not recommended).}
 }
 \value{
 A list of data frames containing the Word2Vec projections

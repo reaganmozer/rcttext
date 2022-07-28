@@ -12,13 +12,13 @@
 #
 
 
-source( "reads-replication/setup.R" )
+source("reads-replication/setup.R")
 
 library( haven )
 dat=read_dta( reads_file_path("Data/g1g2_analyticfile_public.dta") )
 
 reads.dict=read.table( reads_file_path("Data/reads_dict.txt") )
-
+head( reads.dict )
 
 
 # include only those who have all demographics and pre-test scores
@@ -63,138 +63,103 @@ dat2 %>% group_by(grade,subject) %>%
   summarise(n.students=length(unique(s_id)))
 dat2 %>% group_by(subject) %>%
   summarise(mean.nchar = mean(nchar(text)),
-                                         sd.nchar=sd(nchar(text)))
+            sd.nchar=sd(nchar(text)))
 
 
 dat2 = select(dat2, s_id, t_id, sch_id, grade, subject, more, s_maprit_1819w, score, text)
 apply(dat2,2,anyNA) # check for no missing
 
 
-library(quanteda)
-library(hunspell)
-library(tm)
-
-dat2$text.sc = iconv(tolower(dat2$text), from="UTF-8", to="ASCII", sub="")
-
 # Clean up some punctuation stuff
-dat2$text.sc = repair_spelling( dat2$text.sc,
-                                c( "s's", "s'", "." ),
-                                c( "s'", "s' ", ". " ) )
-
+dat2$text.sc = repair_spelling( dat2$text,
+                                c("s's","s'","."),
+                                c("s'","s'",".") )
+dat2$text.sc = iconv(tolower(dat2$text.sc), from="UTF-8", to="ASCII", sub="")
 dat1 = dat2
+
+
 
 # Some data cleaning/autocorrecting of the misspelled words
 words = tribble( ~from, ~to,
-  " aateroid "," asteroid ",
-  " advanture "," adventure ",
-  " accidently "," accidentally ",
-  " apiniter "," painter ",
-  " beause "," because ",
-  " leonard "," leonardo ",
-  " dinos "," dinosaurs ",
-  " dino's "," dinosaurs ",
-  " dino "," dinosaur ",
-  " shoud "," should ",
-  " wiht "," with ",
-  " earhar "," earhart ",
-  " earhard "," earhart ",
-  " leonarod "," leonardo ",
-  " thinked "," think ",
-  "da vinci","davinci",
-  "da v inci"," davinci ",
-  " nad "," and ",
-  " dont "," do not ",
-  " theat "," that ",
-  " rees "," trees ",
-  " studing "," studying ",
-  " striked "," strike ",
-  " opinon "," opinion ",
-  " oone "," one ",
-  " cuting "," cutting ",
-  " sthe "," the ",
-  " sould  "," should ",
-  " tryed  "," tried ",
-  " writed  "," write ",
-  " rianforest  "," rainforest ",
-  " i've "," i have ",
-  " i'll "," i will ",
-  " they're "," they are ",
-  " flyed "," fly ",
-  " drawed "," drew ",
-  " alantic "," atlantic " )
+                 "aateroid","asteroid",
+                 "advanture","adventure",
+                 "accidently","accidentally",
+                 "apiniter","painter",
+                 "beause","because",
+                 "leonard","leonardo",
+                 "dinos","dinosaurs",
+                 "dino's","dinosaurs",
+                 "dino","dinosaur",
+                 "shoud","should",
+                 "wiht","with",
+                 "earhar","earhart",
+                 "earhard","earhart",
+                 "leonarod","leonardo",
+                 "thinked","think",
+                 "da vinci","davinci",
+                 "da v inci","davinci",
+                 "nad","and",
+                 "dont","do not",
+                 "theat","that",
+                 "rees","trees",
+                 "studing","studying",
+                 "striked","strike",
+                 "opinon","opinion",
+                 "oone","one",
+                 "cuting","cutting",
+                 "sthe","the",
+                 "sould ","should",
+                 "tryed ","tried",
+                 "writed ","write",
+                 "rianforest ","rainforest",
+                 "i've","i have",
+                 "i'll","i will",
+                 "they're","they are",
+                 "flyed","fly",
+                 "drawed","drew",
+                 "alantic","atlantic",
+                 "airplain","airplane",
+                 "airplanee","airplane",
+                 "airplanees","airplanes",
+                 "beause","because",
+                 "oceann","ocean",
+                 "airplanee","airplane",
+                 "did't","did not",
+                 "wouldd","would",
+                 "wantd","wanted",
+                 "coildn't","could not",
+                 "coild","could",
+                 "probems","problems",
+                 "probem","problem",
+                 "studf","stuff",
+                 "machinee","machine",
+                 "anotherr","another" )
+
+
+
 dat2$text.sc = repair_spelling( dat2$text.sc, words )
 
-
-hunspell::dictionary("en_US",add_words = reads.dict$V1)
-vocab = dat2$text.sc %>% tokens() %>%
-  dfm() %>%
-  colnames() %>%
-  tolower()
-table(hunspell_check(vocab))
-
-mis = sort(vocab[hunspell_check(vocab,hunspell::dictionary("en_US",add_words = reads.dict$V1))==F])
-rm = which(removePunctuation(mis)=="" | removeNumbers(mis)=="" | removePunctuation(removeNumbers(mis))=="")
-rm2=which(startsWith(mis, "#") | startsWith(mis, "1") | startsWith(mis,"2") | startsWith(mis,"3") | startsWith(mis,"8"))
-mis = mis[-c(rm,rm2)]
-mis = mis[nchar(mis)>3]
-
-mis = mis[!mis%in%c("mona","striked","dinos","venus","wolly","xbox","youtube","ipads")]
-
-spellcorrect = function(x){
-  h=hunspell_suggest(x)[[1]][1]
-  return(cbind(x,h))
-}
-subs=as.data.frame(do.call(rbind,lapply(1:length(mis),function(x)spellcorrect(mis[x]))))
-subs=subs[!is.na(subs$h),]
-dfm = dat2$text.sc %>% tokens() %>%
-  dfm(tolower=TRUE)
-
-counts=c()
-for (j in 1:nrow(subs)){
-  counts[j]=colSums(dfm)[colnames(dfm)==tolower(subs$x[j])]
-}
-subs$counts=counts
-subs=subs[with(subs,order(counts,decreasing=T)),]
-
-subs$x=paste0(" ", as.character(subs$x),"")
-subs$h=paste0(" ", as.character(subs$h),"")
-
-tmp = as.character(gsub(subs$x[1], subs$h[1],tolower(dat2$text.sc), fixed=T))
-for (j in 2:nrow(subs)){
-  tmp = gsub(subs$x[j], subs$h[j], tmp, fixed=T)
-}
-
-tmp = tolower(tmp)
-tmp = repair_spelling( tmp,
-                       c( "they're", "i'll" ),
-                       c( "they are", "i will" ) )
-
-dat2$text.sc=tmp
-
-
-words = tribble( ~from, ~to,
-  "airplain","airplane",
-  "airplanee","airplane",
-  "airplanees","airplanes",
-  "beause","because",
-  "oceann","ocean",
-  "airplanee","airplane",
-  "did't","did not",
-  "wouldd","would",
-  "wantd","wanted",
-  "coildn't","could not",
-  "coild","could",
-  "probems","problems",
-  "probem","problem",
-  "studf","stuff",
-  "machinee","machine",
-  "anotherr","another"
-)
-dat2$text.sc = repair_spelling(dat2$text.sc, words)
+# Expand some contractions
+dat2$text.sc = repair_spelling( dat2$text.sc,
+                                c("they're","i'll"),
+                                c("they are","i will") )
 
 
 
-# output file to analyze in LIWC/elsewhere
+additional_words = c("mona","striked","dinos","venus","wolly","xbox","youtube","ipads")
+additional_words = unique( c( additional_words, reads.dict$V1 ) )
+skip_prefix = c("#","1","2","3","8")
+
+dat2$text.sc=apply_hunspell( dat2$text.sc,
+                             additional_words = additional_words,
+                             skip_prefix = skip_prefix )
+
+
+
+
+
+
+#### output file to analyze in LIWC/elsewhere  ####
 
 
 
@@ -227,8 +192,8 @@ save(meta, text, rater.scores,
 
 
 # Write cleaned essays to text files for analysis via TAACO
-dnames = paste0("s", text$s_id, "_grade", text$grade, "_", text$subject, ".txt")
+dnames = paste0("s", text$s_id,"_grade", text$grade,"_", text$subject,".txt")
 
 tada::prep_external(text$text.sc,
-              dir=reads_file_path("Generated Data/text_files/" ),
-              docnames=dnames)
+                    dir=reads_file_path("Generated Data/text_files/"),
+                    docnames=dnames)

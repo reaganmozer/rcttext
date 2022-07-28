@@ -23,6 +23,7 @@ clean_features <- function( meta, ignore = NULL,
 
   require( caret )
   is.mat = is.matrix(meta)
+  meta_aside = NULL
 
   if ( !is.null(ignore) ) {
     set_aside = match(ignore, colnames(meta))
@@ -36,9 +37,6 @@ clean_features <- function( meta, ignore = NULL,
     meta = as.matrix( meta[,-set_aside] )
   } else {
     meta = as.matrix( meta )
-  }
-  else{
-    meta=as.matrix(meta)
   }
 
   stopifnot( is.numeric(meta) )
@@ -71,5 +69,9 @@ clean_features <- function( meta, ignore = NULL,
     meta = meta[,-c(cor)]
   }
 
-  cbind( meta_aside, meta )
+  if ( !is.null(meta_aside) ) {
+    cbind( meta_aside, meta )
+  } else {
+    meta
+  }
 }

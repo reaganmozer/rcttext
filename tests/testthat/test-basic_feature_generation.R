@@ -1,5 +1,5 @@
 
-test_that("multiplication works", {
+test_that("basic feature generation works", {
   data( "toy_reads" )
 
 
@@ -26,10 +26,9 @@ test_that("multiplication works", {
   expect_true( tt[2] == 3 )
 
   # Add Word2Vec projections for each essay on 50 dimensions
-  #load( "data-raw/glove.50d.RData" )
-  #all.feats = extract_w2v( clean_text(essay.text),
-  #                         meta = all.feats,
-  #                         model = glove.50d )
+  all.feats = extract_w2v( clean_text(essay.text),
+                           meta = all.feats,
+                           model = NULL )
 
 
 
