@@ -14,60 +14,100 @@
 #'
 #' @param x A \link{corpus} object or character vector of text
 #'   documents.
+#' @param meta Dataframe corresponding to the corpus x.  If passed,
+#'   and non-NULL, all features will be added to this dataframe.
 #' @param lex Logical, indicating whether to compute lexical indices
 #'   including measures of lexical diversity, readability, and entropy
 #' @param sent Logical, indicating whether to compute sentiment
 #'   analysis features from available dictionaries
+#' @param clean_features TRUE means implement cleaning step where we
+#'   drop features with no variation and colinear features. (This
+#'   happens before any term generation features are added.)
 #' @param ld character vector defining lexical diversity measures to
 #'   compute; see \link{quanteda.textstats::textstat_lexdiv()}
 #' @param read character vector defining readability measures to
 #'   compute; see \link{quanteda.textstats::textstat_readability()}
 #' @param terms character vector of terms to evaluate as standalone
-#'   features based on document-level frequency (case-insensitive)
+#'   features based on document-level frequency (case-insensitive).
+#'   Not cleaned by clean_features.
 #' @param preProc Named list of arguments passed to
 #'   \code{caret::preProcess()} for applying pre-processing
 #'   transformations across the set of text features (e.g., removing
 #'   collinear features).
 #' @param ... (optional) additional arguments passed to
 #'   \link{quanteda::tokens()} for text pre-processing.
-#' @return A matrix of available text features, one row per document,
+#' @return A data.frame of available text features, one row per document,
 #'   one column per feature.
 #' @references{ \insertRef{pennington2014glove}{tada} }
 #' @export
 
-tada <- function(x, lex=TRUE, sent=TRUE,
-                 ld="all",
-                 read=c( 'ARI','Coleman','DRP','ELF',
-                         'Flesch','Flesch.Kincaid','meanWordSyllables'),
-                 terms = NULL,
-                 preProc=list(uniqueCut=1, freqCut=99/1, cor=0.95, remove.lc=TRUE),
-                 verbose = FALSE ){
+generate_features <- function(x,
+                              meta = NULL,
+                              lex=TRUE, sent=TRUE,
+                              ld="all",
+                              clean_features = TRUE,
+                              read=c( 'ARI','Coleman','DRP','ELF',
+                                      'Flesch','Flesch.Kincaid','meanWordSyllables'),
+                              terms = NULL,
+                              preProc=list(uniqueCut=1, freqCut=99/1, cor=0.95, remove.lc=TRUE),
+                              verbose = FALSE ){
 
+  ignore = "ID"
+  if ( !is.null(meta) ) {
+    stopifnot( is.data.frame(meta) )
+    ignore = colnames(meta)
+  }
+
+  # utility to add on features
+  add_features <- function( feats, new_feats ) {
+    if ( is.null( feats ) ) {
+      new_feats
+    } else {
+      cbind( feats, new_feats )
+    }
+  }
+
+  vcat( verbose, "Generate multiple classes of features" )
 
   raw = x
-  clean = tm::removeNumbers(tm::stripWhitespace(tm::removePunctuation(tolower(raw))))
+
+  vcat( verbose, "Initial tokenizing and cleaning of text" )
+  clean = raw %>%
+    tolower() %>%
+    tm::removePunctuation() %>%
+    tm::stripWhitespace() %>%
+    tm::removeNumbers()
 
   tok.clean = quanteda::tokens(clean)
   dfm.clean = quanteda::dfm(tok.clean)
 
-  all.feats=data.frame()
+  if ( is.null( meta ) ) {
+    all.feats=NULL
+  } else {
+    stopifnot( is.data.frame(meta) )
+    stopifnot( nrow( meta ) == nrow(dfm.clean) )
+    all.feats = meta
+  }
 
-  if (lex){
+  if (lex) {
     vcat( verbose, "Calculating lexical indices" )
-    f.ld = quanteda.textstats::textstat_lexdiv(dfm.clean, measure=ld, remove_numbers=F, remove_punct=T,
+    f.ld = quanteda.textstats::textstat_lexdiv(dfm.clean, measure=ld,
+                                               remove_numbers=F, remove_punct=T,
                                                remove_symbols=F)
     f.read = quanteda.textstats::textstat_readability(raw, measure=read, intermediate = F)
     f.ent = quanteda.textstats::textstat_entropy(dfm.clean, margin="documents")
-    all.feats = cbind(f.ld[,-c(1)], f.read[,-c(1)], f.ent[,-c(1)])
+    lex.feats = cbind(f.ld[,-c(1)], f.read[,-c(1)], f.ent[,-c(1)])
+    names(lex.feats) = paste0( "lex_", names(lex.feats) )
+
+    all.feats = add_features( all.feats, lex.feats )
   }
 
   if (sent){
-    vcat( verbose, "Calculating sentiment scores\n" )
+    vcat( verbose, "Calculating sentiment scores" )
 
     require(quanteda.sentiment)
 
     # Valence scores
-
     dics = list(data_dictionary_AFINN, data_dictionary_ANEW, data_dictionary_sentiws)
     names(dics)=c("AFINN","ANEW","sentiws")
     val = do.call(cbind, lapply(dics, function(x) textstat_valence(tok.clean, dictionary=x)[,2]))
@@ -79,7 +119,6 @@ tada <- function(x, lex=TRUE, sent=TRUE,
     dics2 = list(data_dictionary_LSD2015, data_dictionary_NRC, data_dictionary_LoughranMcDonald)
     pol = do.call(cbind, lapply(dics2, function(x) textstat_polarity(tok.clean, dictionary=x)[,2]))
     names(pol)=c("LSD2015","NRC","LoughranMcDonald")
-
 
     corp = quanteda::corpus(raw)
     sent= liwcalike(corp, dictionary = quanteda.dictionaries::data_dictionary_RID)
@@ -93,60 +132,46 @@ tada <- function(x, lex=TRUE, sent=TRUE,
 
     sent = cbind(sent, sent1, sent2)
 
-
     new = cbind(val, pol, sent)
     zv = apply(new,2,function(x)length(unique(x))==1)
     new = new[,!zv]
+    names(new) = paste0( "sent_", names(new) )
+    #add = new[,!names(new)%in%names(all.feats)]
+    all.feats = add_features( all.feats, new )
 
-    add = new[,!names(new)%in%names(all.feats)]
-    all.feats = cbind(all.feats, add)
+    # Need sentence WC to make this feature.
+    all.feats$WCperChar = all.feats$sent_WC / nchar(clean)
   }
 
-  all.feats$WCperChar = all.feats$WC/nchar(clean)
-
-
-
-  if (preProc$remove.lc==TRUE){
-    lc=caret::findLinearCombos(all.feats)
-    if (!is.null(lc$remove)){
-      all.feats = all.feats[,-c(lc$remove)]
-    }
+  if ( !is.null( all.feats ) && clean_features ) {
+    all.feats = clean_features( all.feats,
+                                ignore = ignore,
+                                preProc = preProc )
   }
-
-  vcat( verbose, "Dropping low-variaton features and pre-processing features with caret" )
-  nz = caret::nearZeroVar(all.feats, uniqueCut=preProc$uniqueCut, freqCut=preProc$freqCut)
-  out = all.feats[,-c(nz)]
-
-  cor = caret::findCorrelation(cor(out), cutoff=preProc$cor)
-  out = out[,-c(cor)]
 
   if (!is.null(terms)){
-    vcat( verbose, "Working on terms" )
+    vcat( verbose, "Generating term features" )
+    dfm.freq = quanteda::dfm(quanteda::tokens(clean_text(raw)))
 
-    dfm.freq = quanteda::dfm(quanteda::tokens(clean_txt(raw)))
-    tmp=as.matrix(dfm.freq)[,which(colnames(dfm.freq)%in%terms)]
-    if (length(terms) == 1){
-      tmp = as.data.frame(tmp); rownames(tmp)=NULL
+    f_terms <- terms %in% colnames(dfm.freq)
+    if ( !all( f_terms ) ) {
+      warning( "Not all terms (", paste0( terms[f_terms], sep=", " ), ") found in dfm" )
+    }
+
+    tmp=as.matrix(dfm.freq)[, which(colnames(dfm.freq)%in%terms), drop=FALSE]
+
+    if (ncol(tmp) == 1) {
+      tmp = as.data.frame(tmp)
+      rownames(tmp)=NULL
       names(tmp)=terms
     }
-    out = as.data.frame(cbind(out, tmp))
-
+    if ( ncol(tmp) > 0 ) {
+      all.feats = add_features( all.feats, as.data.frame(tmp) )
+    }
   }
 
-  return(out)
+  return(all.feats)
 }
 
 
-
-#' Internal data cleaning function
-#' @keywords internal
-
-clean_txt = function(x){
-  require(tm)
-  tmp = gsub(".", " . ", x, fixed=TRUE)
-  tmp = gsub(",", " . ", tmp, fixed=TRUE)
-  tmp = gsub("-", "  ", tmp, fixed=TRUE)
-  tmp = stripWhitespace(removePunctuation(tolower(tmp)))
-  return(tmp)
-}
 

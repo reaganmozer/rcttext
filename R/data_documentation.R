@@ -1,9 +1,11 @@
 
 
 
-#' Dataset containing word embeddings on 50 dimensions based on GloVe pre-trained embedding model
-#' @docType data
-#' @details 50-dimensional word embedding vectors for 400,000 terms and phrases based on GloVe pre-trained embedding model
+#' Dataset with 20 essays from READS pilot data
+#'
+#' Used for testing and illustation of tada functions.
+#' @details 5 column data.frame, ID is the id of subject, Q1, Q2, more are meta information on scoring, and text contains character string of the text of the essay.
 #' @keywords data
-#' @format A \link{data.frame} with 400,000 terms and 50 dimensions of word embeddings
-"glove.50d"
+#' @format A \link{data.frame} with 5 columns and 20 rows
+#'
+"toy_reads"

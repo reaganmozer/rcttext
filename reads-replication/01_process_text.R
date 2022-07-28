@@ -1,12 +1,25 @@
-## Process and clean the essay texts
+# Process and clean the essay texts
+#
+# Loads the g1 & g2 public file and makes cleaned datasets for later
+# analysis.
+#
+# Actions:
+#
+# Correct spelling for a list of commonly misspelled words in corpus
+#
+# Also write individual text files for each document to be processed
+# by third party software.
+#
 
 
-setwd( here::here( "../Replication" ) )
-options(stringsAsFactors = FALSE)
-library(tidyverse)
-library(haven)
+source( "reads-replication/setup.R" )
 
-dat=read_dta("Data/g1g2_analyticfile_public.dta")
+library( haven )
+dat=read_dta( reads_file_path("Data/g1g2_analyticfile_public.dta") )
+
+reads.dict=read.table( reads_file_path("Data/reads_dict.txt") )
+
+
 
 # include only those who have all demographics and pre-test scores
 check.admin = select(dat, s_id, s_white_num:s_ses_high, s_dib_score_1819w, s_maprit_1819w, s_itt_consented)
@@ -46,8 +59,10 @@ sci$subject="science"
 soc$subject="social"
 
 dat2 = rbind(sci, soc)
-dat2 %>% group_by(grade,subject) %>% summarise(n.students=length(unique(s_id)))
-dat2 %>% group_by(subject) %>% summarise(mean.nchar = mean(nchar(text)),
+dat2 %>% group_by(grade,subject) %>%
+  summarise(n.students=length(unique(s_id)))
+dat2 %>% group_by(subject) %>%
+  summarise(mean.nchar = mean(nchar(text)),
                                          sd.nchar=sd(nchar(text)))
 
 
@@ -59,57 +74,62 @@ library(quanteda)
 library(hunspell)
 library(tm)
 
-# Some data cleaning/autocorrecting of the misspelled words
 dat2$text.sc = iconv(tolower(dat2$text), from="UTF-8", to="ASCII", sub="")
-dat2$text.sc = gsub("-", " - ", dat2$text.sc, fixed=T)
-dat2$text.sc = gsub("s's", "s'", dat2$text.sc, fixed=T)
-dat2$text.sc = gsub("s'", "s' ", dat2$text.sc, fixed=T)
-dat2$text.sc = gsub(".", ". ", dat2$text.sc, fixed=T)
-dat1= dat2
 
-dat2$text.sc = gsub(" aateroid "," asteroid ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" advanture "," adventure ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" accidently "," accidentally ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" apiniter "," painter ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" beause "," because ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" leonard "," leonardo ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" dinos "," dinosaurs ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" dino's "," dinosaurs ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" dino "," dinosaur ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" shoud "," should ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" wiht "," with ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" earhar "," earhart ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" earhard "," earhart ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" leonarod "," leonardo ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" thinked "," think ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub("da vinci","davinci",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub("da v inci"," davinci ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" nad "," and ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" dont "," do not ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" theat "," that ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" rees "," trees ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" studing "," studying ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" striked "," strike ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" opinon "," opinion ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" oone "," one ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" cuting "," cutting ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" sthe "," the ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" sould  "," should ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" tryed  "," tried ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" writed  "," write ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" rianforest  "," rainforest ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" i've "," i have ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" i'll "," i will ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" they're "," they are ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" flyed "," fly ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" drawed "," drew ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub(" alantic "," atlantic ",dat2$text.sc,fixed=T)
+# Clean up some punctuation stuff
+dat2$text.sc = repair_spelling( dat2$text.sc,
+                                c( "s's", "s'", "." ),
+                                c( "s'", "s' ", ". " ) )
+
+dat1 = dat2
+
+# Some data cleaning/autocorrecting of the misspelled words
+words = tribble( ~from, ~to,
+  " aateroid "," asteroid ",
+  " advanture "," adventure ",
+  " accidently "," accidentally ",
+  " apiniter "," painter ",
+  " beause "," because ",
+  " leonard "," leonardo ",
+  " dinos "," dinosaurs ",
+  " dino's "," dinosaurs ",
+  " dino "," dinosaur ",
+  " shoud "," should ",
+  " wiht "," with ",
+  " earhar "," earhart ",
+  " earhard "," earhart ",
+  " leonarod "," leonardo ",
+  " thinked "," think ",
+  "da vinci","davinci",
+  "da v inci"," davinci ",
+  " nad "," and ",
+  " dont "," do not ",
+  " theat "," that ",
+  " rees "," trees ",
+  " studing "," studying ",
+  " striked "," strike ",
+  " opinon "," opinion ",
+  " oone "," one ",
+  " cuting "," cutting ",
+  " sthe "," the ",
+  " sould  "," should ",
+  " tryed  "," tried ",
+  " writed  "," write ",
+  " rianforest  "," rainforest ",
+  " i've "," i have ",
+  " i'll "," i will ",
+  " they're "," they are ",
+  " flyed "," fly ",
+  " drawed "," drew ",
+  " alantic "," atlantic " )
+dat2$text.sc = repair_spelling( dat2$text.sc, words )
 
 
-
-reads.dict=read.table("Data/reads_dict.txt")
 hunspell::dictionary("en_US",add_words = reads.dict$V1)
-vocab = tolower(colnames(dfm(c(dat2$text.sc))))
+vocab = dat2$text.sc %>% tokens() %>%
+  dfm() %>%
+  colnames() %>%
+  tolower()
 table(hunspell_check(vocab))
 
 mis = sort(vocab[hunspell_check(vocab,hunspell::dictionary("en_US",add_words = reads.dict$V1))==F])
@@ -126,9 +146,13 @@ spellcorrect = function(x){
 }
 subs=as.data.frame(do.call(rbind,lapply(1:length(mis),function(x)spellcorrect(mis[x]))))
 subs=subs[!is.na(subs$h),]
-dfm = dfm(dat2$text.sc,tolower=T)
+dfm = dat2$text.sc %>% tokens() %>%
+  dfm(tolower=TRUE)
+
 counts=c()
-for (j in 1:nrow(subs)){counts[j]=colSums(dfm)[colnames(dfm)==tolower(subs$x[j])]}
+for (j in 1:nrow(subs)){
+  counts[j]=colSums(dfm)[colnames(dfm)==tolower(subs$x[j])]
+}
 subs$counts=counts
 subs=subs[with(subs,order(counts,decreasing=T)),]
 
@@ -141,25 +165,34 @@ for (j in 2:nrow(subs)){
 }
 
 tmp = tolower(tmp)
-tmp = gsub(" they're "," they are ",tmp,fixed=T)
-tmp = gsub(" i'll "," i will ",tmp,fixed=T)
-dat2$text.sc=tolower(tmp)
-dat2$text.sc = gsub(" airplain "," airplane ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub("airplanee"," airplane ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub("airplanees"," airplanes ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub("beause"," because ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub("oceann"," ocean ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub("airplanee"," airplane ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub("did't"," did not ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub("wouldd"," would ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub("wantd"," wanted ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub("coildn't"," could not ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub("coild"," could ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub("probems"," problems ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub("probem"," problem ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub("studf"," stuff ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub("machinee"," machine ",dat2$text.sc,fixed=T)
-dat2$text.sc = gsub("anotherr"," another ",dat2$text.sc,fixed=T)
+tmp = repair_spelling( tmp,
+                       c( "they're", "i'll" ),
+                       c( "they are", "i will" ) )
+
+dat2$text.sc=tmp
+
+
+words = tribble( ~from, ~to,
+  "airplain","airplane",
+  "airplanee","airplane",
+  "airplanees","airplanes",
+  "beause","because",
+  "oceann","ocean",
+  "airplanee","airplane",
+  "did't","did not",
+  "wouldd","would",
+  "wantd","wanted",
+  "coildn't","could not",
+  "coild","could",
+  "probems","problems",
+  "probem","problem",
+  "studf","stuff",
+  "machinee","machine",
+  "anotherr","another"
+)
+dat2$text.sc = repair_spelling(dat2$text.sc, words)
+
+
 
 # output file to analyze in LIWC/elsewhere
 
@@ -182,12 +215,20 @@ text = text[!text$text%in%c("","can't decipher"),]
 
 text$text.sc = tm::stripWhitespace(text$text.sc)
 
-write.csv(text, file="Generated Data/text_g1g2_consented.csv", row.names=F)
-save(meta, text, rater.scores, file="Generated Data/meta.RData")
 
-library(tada)
+#### Save processed data to intermediate files ####
+
+write.csv(text,
+          file=reads_file_path("Generated Data/text_g1g2_consented.csv"),
+          row.names=F)
+
+save(meta, text, rater.scores,
+     file=reads_file_path("Generated Data/meta.RData") )
+
 
 # Write cleaned essays to text files for analysis via TAACO
 dnames = paste0("s", text$s_id, "_grade", text$grade, "_", text$subject, ".txt")
 
-prep_external(text$text.sc,dir="Generated Data/text_files/",docnames=dnames)
+tada::prep_external(text$text.sc,
+              dir=reads_file_path("Generated Data/text_files/" ),
+              docnames=dnames)

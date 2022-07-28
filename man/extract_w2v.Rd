@@ -2,29 +2,37 @@
 % Please edit documentation in R/extract_w2v.R
 \name{extract_w2v}
 \alias{extract_w2v}
-\title{Compute document-level feature vectors from a pre-trained embedding model.}
+\title{Compute document-level feature vectors from a pre-trained embedding
+model.}
 \usage{
-extract_w2v(x, glove = TRUE, dim = 50, model = NULL)
+extract_w2v(x, meta = NULL, glove = TRUE, dim = 50, model = NULL)
 }
 \arguments{
-\item{x}{A \link{corpus()} object or character vector of text documents.}
+\item{x}{A \link{corpus} object or character vector of text
+documents.}
 
-\item{glove}{Logical.  True means use pre-trained GloVe embedding model.}
+\item{meta}{Dataframe corresponding to the corpus x.  If passed,
+and non-NULL, all features will be added to this dataframe.}
 
-\item{dim}{Dimension(s) of the pre-trained GloVe embedding model; allowed values are 50 (default), 100, 200, and 300}
+\item{glove}{Logical.  True means use pre-trained GloVe embedding
+model.}
 
-\item{model}{User-specified model object pointing to a custom pre-trained
-Word2Vec model.}
+\item{dim}{Dimension(s) of the pre-trained GloVe embedding model;
+allowed values are 50 (default), 100, 200, and 300}
+
+\item{model}{User-specified model object pointing to a custom
+pre-trained Word2Vec model, represented as a matrix with rownames
+of the words and rows being the embeddings for each word.}
 }
 \value{
-A list of data frames containing the Word2Vec projections of the
-  corpus
+A list of data frames containing the Word2Vec projections
+  of the corpus
 }
 \description{
-This function generates a vector embedding for each word in a string using a
-set of pre-trained word vectors such as GloVe
-\insertCite{pennington2014glove}{tada} and returns the mean vector projection
-across all words in a document.
+This function generates a vector embedding for each word in a
+string using a set of pre-trained word vectors such as GloVe
+\insertCite{pennington2014glove}{tada} and returns the mean vector
+projection across all words in a document.
 }
 \references{
 { \insertRef{mikolov2013efficient}{tada}

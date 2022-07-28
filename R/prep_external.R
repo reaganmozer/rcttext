@@ -1,23 +1,27 @@
 #' Prepare text documents for analysis using external programs
 #'
-#' Text pre-processing and corpus management functions to provide compatibility
-#' with external text analysis programs and standalone software packages such as
-#' Linguistic Inquiry Word Count (LIWC), the Tool for Automated Analysis of
-#' Cohesion (TAACO) and the Sentiment Analysis and Social Cognition Engine (SEANCE).
+#' Text pre-processing and corpus management functions to provide
+#' compatibility with external text analysis programs and standalone
+#' software packages such as Linguistic Inquiry Word Count (LIWC), the
+#' Tool for Automated Analysis of Cohesion (TAACO) and the Sentiment
+#' Analysis and Social Cognition Engine (SEANCE).
 #'
-#' @param x A \link{corpus} object or character vector of text documents.
-#' @param dir Name of directory where TAACO intermediate text files should be
-#'   stored.
-#' @param docnames Optional character string specifying file names for each
-#'   document in \code{x}.
-#' @param preProc Optional text pre-processing function(s) (e.g., stemming) to apply prior to writing text files
-#' for analysis in external programs.
+#' @param x A \link{corpus} object or character vector of text
+#'   documents.
+#' @param dir Name of directory where TAACO intermediate text files
+#'   should be stored.
+#' @param docnames Optional character string specifying file names for
+#'   each document in \code{x}.
+#' @param preProc Optional text pre-processing function(s) (e.g.,
+#'   stemming) to apply prior to writing text files for analysis in
+#'   external programs.
+#'
 #' @references{ \insertRef{liwc2015}{tada}
 #' \insertRef{crossley2016taaco}{tada}
 #' \insertRef{crossley2017sentiment}{tada}}
 #' @export
 
-prep_external = function(x,dir,docnames=NULL,preProc=NULL){
+prep_external = function(x, dir, docnames=NULL, preProc=NULL){
 
 
   library(tm)

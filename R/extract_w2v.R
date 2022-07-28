@@ -8,40 +8,66 @@
 #'
 #' @import tm
 #'
+#' @inheritParams generate_features
 #'
-#' @param x A \link{corpus()} object or character vector of text
-#'   documents.
 #' @param glove Logical.  True means use pre-trained GloVe embedding
 #'   model.
 #' @param dim Dimension(s) of the pre-trained GloVe embedding model;
 #'   allowed values are 50 (default), 100, 200, and 300
 #' @param model User-specified model object pointing to a custom
-#'   pre-trained Word2Vec model.
+#'   pre-trained Word2Vec model, represented as a matrix with rownames
+#'   of the words and rows being the embeddings for each word.
 #' @return A list of data frames containing the Word2Vec projections
 #'   of the corpus
 #'
 #' @references{ \insertRef{mikolov2013efficient}{tada}
 #' \insertRef{pennington2014glove}{tada} }
 #' @export
-extract_w2v <- function(x, glove=TRUE, dim=50,
-                       model=NULL){
+extract_w2v <- function(x,
+                        meta = NULL,
+                        glove=TRUE, dim=50,
+                        model=NULL) {
 
-  stopifnot( all(dim) %in% c( 50, 100, 200, 300 ) )
+  if ( !is.null(meta) ) {
+    stopifnot( length(x) == nrow(meta) )
+  }
 
-  for (j in 1:length(dim)){
+  # Loop over list of dimensions, calling ourselves to build up full
+  # list
+  if ( is.null(model) && length( dim ) > 1 ) {
+    proj = meta
+    for ( d in dim ) {
+      proj = extract_w2v( x = x, meta = proj,
+                          glove = glove, dim = d, model = model )
+    }
+  }
+
+  if ( is.null(model) ) {
+    # Load model if not passed
+    stopifnot( all(dim) %in% c( 50, 100, 200, 300 ) )
+
     fname=paste0("glove.",dim,"d")
     data(list=fname)
     glove = get(fname)
+    stopifnot( ncol(glove) == dim )
+  } else {
+    glove = model
+    dim = ncol(glove)
   }
-  glove.vocab = unique(tm::removePunctuation(names(glove)))
-  glove = data.frame(t(glove))
-  glove$words = rownames(glove)
-  k = ncol(glove)
-  glove2 = glove[,c(k, 1:(k-1))]
 
-  proj = softmaxreg::wordEmbed(x, dictionary=glove2, meanVec=TRUE)
+  glove = rownames_to_column(glove, var = "word")
+
+  #glove.vocab = unique(removePunctuation(names(glove.50d)))
+
+  proj = softmaxreg::wordEmbed(essay.text, dictionary=glove, meanVec=TRUE)
   proj = as.data.frame(proj)
-  names(proj) = paste0("W2V.d", 1:50)
+  names(proj) = paste0("W2V.d", 1:dim )
+
+  if ( !is.null( meta ) ) {
+    stopifnot( nrow(meta) == nrow(proj) )
+    proj = cbind( meta, proj )
+  }
+
   return(proj)
 
 }

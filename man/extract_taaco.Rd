@@ -5,16 +5,30 @@
 \alias{prep_taaco}
 \title{Manage and merge text features generated using TAACO}
 \usage{
-extract_taaco(file, data = NULL, idvar = NULL)
+extract_taaco(
+  file,
+  meta = NULL,
+  ID.meta = NULL,
+  drop_para = FALSE,
+  drop_sent = TRUE
+)
 
 prep_taaco(x, dir, docnames = NULL)
 }
 \arguments{
 \item{file}{Filename where TAACO results are stored}
 
-\item{data}{Optional \code{data.frame} with additional document-level variables to include in output.}
+\item{meta}{Optional \code{data.frame} with additional
+document-level variables to include in output.}
 
-\item{idvar}{If \code{data} is specified, character vector with name(s) of variables used for merging.}
+\item{ID.meta}{If \code{meta} is specified, character vector with
+name of variables used for merging.}
+
+\item{drop_para}{Drop paragraph level measures of cohesion from features
+(TRUE/FALSE).}
+
+\item{drop_sent}{Drop adjacent overlap  between sentences
+(TRUE/FALSE).}
 
 \item{x}{A [quanteda::corpus()] object or character vector of text documents.}
 
@@ -27,6 +41,17 @@ Returns a \code{data.frame} of text features.
 }
 \description{
 Tools to support feature extraction using TAACO.
-\code{prep_taaco()} prepares a corpus for analysis in TAACO.
-\code{extract_taaco()} reads output and log files produced by TAACO program and returns a \code{data.frame} that can be merged with other feature sets.
+}
+\details{
+\code{prep_taaco()} prepares a corpus for analysis in TAACO.  Call
+this on the corpus to make files that can be read in and processed
+easily.
+
+Once external processing is complete, \code{extract_taaco()} reads
+output and log files produced by the TAACO program and returns a
+\code{data.frame} that can be merged with other feature sets.
+
+The "Filename" column in the read file should be the IDs (with a
+'.txt' suffix that will be dropped).  The results can then be
+merged with `meta`, if passed,
 }

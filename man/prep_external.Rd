@@ -7,22 +7,25 @@
 prep_external(x, dir, docnames = NULL, preProc = NULL)
 }
 \arguments{
-\item{x}{A \link{corpus} object or character vector of text documents.}
+\item{x}{A \link{corpus} object or character vector of text
+documents.}
 
-\item{dir}{Name of directory where TAACO intermediate text files should be
-stored.}
+\item{dir}{Name of directory where TAACO intermediate text files
+should be stored.}
 
-\item{docnames}{Optional character string specifying file names for each
-document in \code{x}.}
+\item{docnames}{Optional character string specifying file names for
+each document in \code{x}.}
 
-\item{preProc}{Optional text pre-processing function(s) (e.g., stemming) to apply prior to writing text files
-for analysis in external programs.}
+\item{preProc}{Optional text pre-processing function(s) (e.g.,
+stemming) to apply prior to writing text files for analysis in
+external programs.}
 }
 \description{
-Text pre-processing and corpus management functions to provide compatibility
-with external text analysis programs and standalone software packages such as
-Linguistic Inquiry Word Count (LIWC), the Tool for Automated Analysis of
-Cohesion (TAACO) and the Sentiment Analysis and Social Cognition Engine (SEANCE).
+Text pre-processing and corpus management functions to provide
+compatibility with external text analysis programs and standalone
+software packages such as Linguistic Inquiry Word Count (LIWC), the
+Tool for Automated Analysis of Cohesion (TAACO) and the Sentiment
+Analysis and Social Cognition Engine (SEANCE).
 }
 \references{
 { \insertRef{liwc2015}{tada}
