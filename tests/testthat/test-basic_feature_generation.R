@@ -3,10 +3,6 @@ test_that("multiplication works", {
   data( "toy_reads" )
 
 
-  reads_file_path <- function( file ) {
-    here::here( "../Replication/", file )
-  }
-
   # Grab key columns of metadata
   all.feats = select(toy_reads, ID, Q1, Q2, more)
 
@@ -38,14 +34,14 @@ test_that("multiplication works", {
 
 
   # Add externally computed LIWC-generated features
-  all.feats <- extract_liwc( reads_file_path("Generated Data/pilot/pilot_LIWC.csv" ),
+  all.feats <- extract_liwc( here::here( "data/reads_liwc.csv" ),
                              meta = all.feats, ID.liwc = 1, ID.meta = "ID",
                              clean = FALSE )
 
   expect_true( !is.null( all.feats$liwc_Quote ) )
 
   # And externally computed TAACO features
-  all.feats <- extract_taaco( reads_file_path("Generated Data/pilot/pilot_taaco_results.csv"),
+  all.feats <- extract_taaco( here::here( "data/reads_taaco.csv" ),
                               meta = all.feats,
                               ID.meta = "ID" )
 
