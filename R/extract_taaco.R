@@ -1,6 +1,9 @@
 #' Manage and merge text features generated using TAACO
 #'
-#' Tools to support feature extraction using TAACO.
+#' These methods help support feature extraction using TAACO.  You
+#' will have to use the external TACCO program to generate these
+#' features; these methods just help move back and forth from R to
+#' TACCO.
 #'
 #' \code{prep_taaco()} prepares a corpus for analysis in TAACO.  Call
 #' this on the corpus to make files that can be read in and processed
@@ -19,8 +22,8 @@
 #'   document-level variables to include in output.
 #' @param ID.meta If \code{meta} is specified, character vector with
 #'   name of variables used for merging.
-#' @param drop_para Drop paragraph level measures of cohesion from features
-#'   (TRUE/FALSE).
+#' @param drop_para Drop paragraph level measures of cohesion from
+#'   features (TRUE/FALSE).
 #' @param drop_sent Drop adjacent overlap  between sentences
 #'   (TRUE/FALSE).
 #' @return Returns a \code{data.frame} of text features.
