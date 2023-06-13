@@ -3,7 +3,7 @@
 
 source( here::here( "reads-replication/setup.R" ) )
 
-pilot = read.csv( reads_file_path("Data/G1sci_pilot_dat.csv") )
+pilot = read.csv( reads_file_path("data/write_machinelearning_pilot_replication.csv") )
 
 if ( FALSE ) {
   # For testing
@@ -12,11 +12,14 @@ if ( FALSE ) {
   pilot = slice_sample( pilot, n=20 )
 }
 
+pilot <- pilot %>% mutate(ID=row_number())
+
 # Grab key columns of metadata
-all.feats = select(pilot, ID, Q1, Q2, more)
+all.feats = select(pilot, ID, writing_quality_score_1,
+                   writing_quality_score_2, more)
 
 # Get text (and repair one piece of spelling)
-essay.text = pilot$text %>%
+essay.text = pilot$response %>%
   repair_spelling( "shoud", "should" )
 
 # Generate set of general features
