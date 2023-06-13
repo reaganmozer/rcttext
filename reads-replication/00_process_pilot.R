@@ -7,7 +7,7 @@ pilot = read.csv( reads_file_path("data/write_machinelearning_pilot_replication.
 
 if ( FALSE ) {
   # For testing
-  # Cut down for illustration purposes (make faster)
+  # Cut down for illustration purposes (make everything faster)
   set.seed(103403)
   pilot = slice_sample( pilot, n=20 )
 }
