@@ -36,6 +36,8 @@
 #'   collinear features).
 #' @param ... (optional) additional arguments passed to
 #'   \link{quanteda::tokens()} for text pre-processing.
+#' @param ignore List of column names to ignore when simplifying
+#'   (e.g., ID column and other columns that should be preserved).
 #' @return A data.frame of available text features, one row per document,
 #'   one column per feature.
 #' @references{ \insertRef{pennington2014glove}{tada} }
@@ -49,10 +51,11 @@ generate_features <- function(x,
                               read=c( 'ARI','Coleman','DRP','ELF',
                                       'Flesch','Flesch.Kincaid','meanWordSyllables'),
                               terms = NULL,
-                              preProc=list(uniqueCut=1, freqCut=99/1, cor=0.95, remove.lc=TRUE),
-                              verbose = FALSE ){
+                              preProc=list(uniqueCut=1, freqCut=99, cor=0.95, remove.lc=TRUE),
+                              verbose = FALSE,
+                              ignore = NULL){
 
-  ignore = "ID"
+  ignore = "s_id"
   if ( !is.null(meta) ) {
     stopifnot( is.data.frame(meta) )
     ignore = colnames(meta)
@@ -72,11 +75,11 @@ generate_features <- function(x,
   raw = x
 
   vcat( verbose, "Initial tokenizing and cleaning of text" )
-  clean = raw %>%
-    tolower() %>%
-    tm::removePunctuation() %>%
-    tm::stripWhitespace() %>%
-    tm::removeNumbers()
+  clean = clean_text(raw)
+
+  # Check pre-processed texts for empty strings
+  has_empties <- any(raw=='')
+  if (has_empties) warning('After pre-processing, texts contain empty strings. This may result in clean_features dropping some features unexpectedly. To avoid this, remove empty texts before running this function. (Note that raw texts may not appear empty; pre-process your texts with clean_text()).')
 
   tok.clean = quanteda::tokens(clean)
   dfm.clean = quanteda::dfm(tok.clean)
@@ -144,9 +147,11 @@ generate_features <- function(x,
   }
 
   if ( !is.null( all.feats ) && clean_features ) {
-    all.feats = clean_features( all.feats,
-                                ignore = ignore,
-                                preProc = preProc )
+    #all.feats = clean_features( all.feats,
+                                #ignore = ignore,
+                                #preProc = preProc )
+    all.feats = do.call(tada::clean_features, c(list(meta=all.feats, ignore=ignore),
+                                          preProc))
   }
 
   if (!is.null(terms)){

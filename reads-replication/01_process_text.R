@@ -15,7 +15,8 @@
 source("reads-replication/setup.R")
 
 library( haven )
-dat=read_dta( reads_file_path("Data/g1g2_analyticfile_public.dta") )
+dat=read.csv( reads_file_path("Data/write_machinelearning_replication_main.csv"),
+              encoding='WINDOWS-1252')
 
 reads.dict=read.table( reads_file_path("Data/reads_dict.txt") )
 head( reads.dict )
@@ -33,17 +34,17 @@ dat = dat %>% filter(!s_id %in% rm.ids)
 rm(check.admin, rm.ids)
 
 rater.scores = select(dat, s_id, t_moreresearchid, sch_researchid, s_itt_consented,
-                      s_sci_claim_r1:s_ss_response)
+                      sci_claim_r1:s_ss_response)
 
 
 dat = select(dat, s_id, t_moreresearchid, sch_researchid, s_itt_consented,
-             s_grade_center, s_maprit_1819w,
+             s_grade, s_maprit_1819w,
              s_sci_write, s_ss_write,
              s_sci_response, s_ss_response)
 dat = dat %>% rename(t_id=t_moreresearchid,
                      sch_id=sch_researchid,
                      more=s_itt_consented,
-                     grade=s_grade_center)
+                     grade=s_grade)
 dat$grade=as.factor(dat$grade)
 levels(dat$grade)=c(1,2)
 
@@ -61,6 +62,11 @@ soc$subject="social"
 dat2 = rbind(sci, soc)
 dat2 %>% group_by(grade,subject) %>%
   summarise(n.students=length(unique(s_id)))
+
+
+# Something weird left over from Windows-1252 encoding; convert to UTF-8
+dat2$text <- iconv(dat2$text, from='WINDOWS-1252', to='UTF-8')
+
 dat2 %>% group_by(subject) %>%
   summarise(mean.nchar = mean(nchar(text)),
             sd.nchar=sd(nchar(text)))
@@ -68,6 +74,10 @@ dat2 %>% group_by(subject) %>%
 
 dat2 = select(dat2, s_id, t_id, sch_id, grade, subject, more, s_maprit_1819w, score, text)
 apply(dat2,2,anyNA) # check for no missing
+
+# For debugging repair_spelling
+dat3 <- dat2
+dat2 <- dat3
 
 
 # Clean up some punctuation stuff
@@ -150,7 +160,7 @@ additional_words = c("mona","striked","dinos","venus","wolly","xbox","youtube","
 additional_words = unique( c( additional_words, reads.dict$V1 ) )
 skip_prefix = c("#","1","2","3","8")
 
-dat2$text.sc=apply_hunspell( dat2$text.sc,
+dat2$text.sc=tada::apply_hunspell( dat2$text.sc,
                              additional_words = additional_words,
                              skip_prefix = skip_prefix )
 
@@ -184,11 +194,11 @@ text$text.sc = tm::stripWhitespace(text$text.sc)
 #### Save processed data to intermediate files ####
 
 write.csv(text,
-          file=reads_file_path("Generated Data/text_g1g2_consented.csv"),
+          file="generated_data/text_g1g2_consented.csv",
           row.names=F)
 
 save(meta, text, rater.scores,
-     file=reads_file_path("Generated Data/meta.RData") )
+     file="generated_data/meta.RData" )
 
 
 # Write cleaned essays to text files for analysis via TAACO

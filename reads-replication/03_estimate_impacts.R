@@ -11,7 +11,7 @@ library(dplyr)
 library(lmerTest)
 library(lmtest)
 
-load("Generated Data/meta.RData")
+load("generated_data/meta.RData")
 
 # Characteristics of the sample
 length(unique(meta$s_id))
@@ -29,14 +29,14 @@ apply(meta,2,function(x)sum(is.na(x)))
 meta$maprit_std = scale(meta$s_maprit_1819w)
 
 
-stats = meta %>% group_by( subject, grade, more ) %>% 
+stats = meta %>% group_by( subject, grade, more ) %>%
   summarise( mn = mean( score ),
-             sd = sd( score ), 
+             sd = sd( score ),
              n = n() )
 stats
 avg_stats = stats %>% group_by( subject ) %>%
     summarise( sd_bar = sqrt( weighted.mean( sd^2, w=n ) ) )
-avg_stats               
+avg_stats
 
 meta %>% group_by( subject ) %>%
   summarise( mn = mean( score ),
@@ -67,7 +67,7 @@ emmeans(Mod.Sci, ~more|grade)
 emmeans(Mod.SS, ~more|grade)
 
 
-texreg::screenreg(list(est.sci, est.soc), 
+texreg::screenreg(list(est.sci, est.soc),
                   custom.model.names=c("Science", "Social Studies"),
                   custom.coef.map = list("(Intercept)"=NA,
                                          "grade2"="Grade 2", "maprit_imp"="Pre-test score", "more"="MORE"))
@@ -87,7 +87,7 @@ est.soc_sch[,2] / est.soc[,2]
 
 
 # Results basically identical.
-texreg::screenreg(list(est.sci, est.sci_sch, est.soc, est.soc_sch), 
+texreg::screenreg(list(est.sci, est.sci_sch, est.soc, est.soc_sch),
                   custom.model.names=c("Science", "Sci (sch)", "Social Studies", "SS (sch)"),
                   custom.coef.map = list("(Intercept)"=NA,
                                          "grade2"="Grade 2", "maprit_imp"="Pre-test score", "more"="MORE"))
@@ -97,46 +97,48 @@ texreg::screenreg(list(est.sci, est.sci_sch, est.soc, est.soc_sch),
 if (FALSE){
   # Multilevel model for science scores
   mod.sci = lmer(score_std ~ 1 + grade + #mean.pretest+
-                   maprit_imp + 
+                   maprit_imp +
                    more + (1|sch_id) + (1|t_id),
                  data=sci)
   summary(mod.sci)
   mod.sci1 = lmer(score_std ~ 1 + grade + #mean.pretest+
-                    maprit_imp+ 
+                    maprit_imp+
                     more + grade*more+ (1|sch_id) + (1|t_id),
                   data=sci)
-  
+
   lrtest(mod.sci, mod.sci1)
-  
+
   # Multilevel model for social scores
   mod.soc = lmer(score_std ~ 1 + grade + #mean.pretest+
-                   maprit_imp + 
+                   maprit_imp +
                    more + (1|sch_id) + (1|t_id),
                  data=soc)
-  
+
   mod.soc1 = lmer(score_std ~ 1 + grade + #mean.pretest+
-                    maprit_imp + 
+                    maprit_imp +
                     more + (grade*more)+ (1|sch_id) + (1|t_id),
                   data=soc )
-  
+
   lrtest(mod.soc, mod.soc1)
 }
-save(Mod.Sci, Mod.SS, est.sci, est.soc, file="Results/tx_models.RData")
+save(Mod.Sci, Mod.SS, est.sci, est.soc, file="results/tx_models.RData")
 
 
 
 
 ##### Estimate treatment impacts on generated text features #####
 
-load("Generated Data/all.info.RData")
+load("generated_data/all.info.RData")
 tmp = select(meta, s_id, grade, subject, more, maprit_std)
 all.info = merge(tmp, all.info, by=c("s_id","grade", "subject", "more"))
 library(caret)
 
-dat = dplyr::select(all.info, sch_id,t_id,more, maprit_std,subject, 
-                    grade, spellcheck, TTR:Sixltr, prep:WCperChar, lemma_ttr:function_ttr,
-                    basic_connectives:addition, reason_and_purpose:all_demonstratives, all_connective, pronoun_density)
-
+# Dropping some features until TAACO and LIWC are redone
+# dat = dplyr::select(all.info, sch_id,t_id,more, maprit_std,subject,
+#                     grade, spellcheck, TTR:Sixltr, prep:WCperChar, lemma_ttr:function_ttr,
+#                     basic_connectives:addition, reason_and_purpose:all_demonstratives, all_connective, pronoun_density)
+dat = dplyr::select(all.info, sch_id,t_id,more, maprit_std,subject,
+                    grade, spellcheck, lex_TTR:sent_Sixltr, WCperChar)
 
 x = dat[,-c(1:6)]
 names(x)[findLinearCombos(x)$remove]
@@ -153,7 +155,7 @@ rm=nearZeroVar(x, uniqueCut = 2, freqCut=99/1, names=T)
 sort(apply(dat[,names(dat)%in%rm], 2, function(x)length(unique(x))))
 
 # remove features with near zero variance or high VOF
-dat = dat %>% select( -filler, -SemiC, -sexual, -swear, -Parenth, -OtherP, 
+dat = dat %>% select( -filler, -SemiC, -sexual, -swear, -Parenth, -OtherP,
                       -Colon, -Quote, -nonflu, -Apostro, -Comma,
                       -Dash, -Period)
 
@@ -171,11 +173,11 @@ dat = dat %>% select( -filler, -SemiC, -sexual, -swear, -Parenth, -OtherP,
 
 #' For each column of x, conduct an analysis of impact of MORE intervention on
 #' feature represented by that column.
-#' 
+#'
 #' Adjust all tests with FDR at end.
 get_diffs = function(d, x){
-  res = data.frame(var=names(x), 
-                   est=NA, SE=NA, stat=NA, 
+  res = data.frame(var=names(x),
+                   est=NA, SE=NA, stat=NA,
                    p.raw=NA, LL=NA, UL=NA )
   tmp = select(d, sch_id, t_id, more, grade, maprit_std)
   for (j in 1:ncol(x)){
@@ -183,10 +185,10 @@ get_diffs = function(d, x){
     tmp$more=as.factor(tmp$more)
     mod = lm(var ~ maprit_std + more, data=tmp)
     vc = sandwich::vcovCL(mod, tmp$sch_id)
-    
+
     #mod = lm(var ~ as.factor(sch_id)+maprit_std + more*grade, data=tmp)
     #vc = sandwich::vcovCL(mod, tmp$t_id)
-    
+
     est=coeftest( mod, vcov. = vc )
     CI = coefci(mod, vcov.=vc)
     res[j,2:5]=est[grep("more",rownames(est)),]
@@ -233,10 +235,10 @@ dd = bind_rows( dd, dd2 )
 dd =  dd %>%
   mutate( delta =  Grp_1 - Grp_0 ) %>%
   dplyr::rename( MORE="Grp_1",
-                 Control="Grp_0") 
+                 Control="Grp_0")
 
-dd = dd %>% pivot_wider(names_from=c(subject), 
-                        values_from=c(Control,MORE,delta)) %>% 
+dd = dd %>% pivot_wider(names_from=c(subject),
+                        values_from=c(Control,MORE,delta)) %>%
   select(grade, name, ends_with("science"), ends_with("social"))
 
 
@@ -264,26 +266,26 @@ dd = dd %>%
   dplyr::rename( MORE="mn_1",
                  Control="mn_0",
                  MORE_sd = sd_1,
-                 Co_sd = sd_0 ) 
+                 Co_sd = sd_0 )
 
 dd = merge(dd, out2, by=c("grade","subject","name"))
 dd$LL.std = dd$LL/((dd$MORE_sd+dd$Co_sd)/2)
 dd$UL.std = dd$UL/((dd$MORE_sd+dd$Co_sd)/2)
 
 
-dd.out = select(dd, grade, subject, name, Control, MORE, 
+dd.out = select(dd, grade, subject, name, Control, MORE,
                 est, LL, UL,
                 delta, LL.std, UL.std,
                 p.adj, p.raw)
-dd.out$pretty.CI.raw = paste0("(", sprintf("%.2f",round(dd$LL,2)), ", ", 
+dd.out$pretty.CI.raw = paste0("(", sprintf("%.2f",round(dd$LL,2)), ", ",
                               sprintf("%.2f",round(dd$UL,2)), ")")
-dd.out$pretty.CI.std = paste0("(", sprintf("%.2f",round(dd$LL.std,2)), ", ", 
+dd.out$pretty.CI.std = paste0("(", sprintf("%.2f",round(dd$LL.std,2)), ", ",
                               sprintf("%.2f",round(dd$UL.std,2)), ")")
 
 dd = select(dd, grade, subject, name, delta, LL.std, UL.std, p.raw, p.adj)
 
 
-#dd = pivot_wider( dd, names_from=subject, 
+#dd = pivot_wider( dd, names_from=subject,
 #                 values_from = c(delta, LL.std, UL.std, p.raw, p.adj, pretty.CI) )
-save(dd.out, dd, file="Results/LIWC_diffs_results.RData")
+save(dd.out, dd, file="results/LIWC_diffs_results.RData")
 

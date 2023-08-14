@@ -12,5 +12,9 @@ clean_text(x)
 \description{
 Quick and easy text cleaning.  Take given copus and
 remove punctuation, remove whitespace, convert everything
-to lowercase.
+to lowercase. This function is used for pre-processing text
+within the generate_features function. The main use for
+clean_text is to check which elements of your text
+are converted to empty strings. Empty strings may result in clean_features
+dropping desired columns.
 }

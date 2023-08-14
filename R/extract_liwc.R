@@ -30,7 +30,7 @@ extract_liwc <- function(file, meta=NULL, ID.liwc=1, ID.meta = NULL, clean=TRUE)
   if ( is.null( ID.liwc ) ) {
     liwc = dplyr::select(liwc, WC:OtherP)
   } else {
-    if ( as.numeric( ID.liwc ) ) {
+    if ( is.numeric( ID.liwc ) ) {
       ID.liwc = names(liwc)[ID.liwc]
     }
     liwc = dplyr::select(liwc, ID.liwc, WC:OtherP)
@@ -39,7 +39,8 @@ extract_liwc <- function(file, meta=NULL, ID.liwc=1, ID.meta = NULL, clean=TRUE)
   # Merge to passed dataframe if one passed.
   if (!is.null(meta)){
     stopifnot( !is.null(ID.meta) )
-    stopifnot( length(ID.meta) == 1 )
+    #stopifnot( length(ID.meta) == 1 )
+      # Want to allow for matching on multiple columns
 
     # drop duplicate features
     liwc = dplyr::select(liwc, !names(liwc)[names(liwc)%in%names(meta)], ID.liwc)
@@ -53,7 +54,8 @@ extract_liwc <- function(file, meta=NULL, ID.liwc=1, ID.meta = NULL, clean=TRUE)
     out = liwc
   }
 
-  if (clean){
+  if (clean){ # I think this works, but it's currently breaking because of
+              # the IDs not matching the LIWC file
     out2=dplyr::select(out, -ID.liwc, -ID.meta)
     lc = caret::findLinearCombos(out2)
     if (!is.null(lc$remove)){

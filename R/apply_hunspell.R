@@ -17,6 +17,7 @@
 #' @param to_lower If TRUE will keep everything lowercase, regardless
 #'   of spelling suggestions.
 #' @return Vector of text, spell-corrected we hope.
+#' @export
 apply_hunspell <- function( text,
                             additional_words = NULL,
                             skip_prefix = NULL,

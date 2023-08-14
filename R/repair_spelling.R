@@ -20,7 +20,7 @@ repair_spelling <- function( text, dictionary, to_words = NULL ) {
     stopifnot( is.character(dictionary) )
     stopifnot( length(dictionary) == length(to_words) )
   } else {
-    to_words = dictionary[,2]
+    to_words = dictionary[[2]]
     dictionary = dictionary[[1]]
   }
 

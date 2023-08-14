@@ -2,7 +2,7 @@
 
 #' Clean and simplify feature set
 #'
-#' Given set of generatred features, simplify set of features using
+#' Given set of generated features, simplify set of features using
 #' carat package.
 #'
 #' @param meta The set of features
@@ -14,10 +14,9 @@
 #' @param remove.lc TRUE means remove colinear combinations of features.
 #' @param verbose Print out progress to console.
 #' @return Updated meta with fewer columns of the preserved features.
-#' @export
 clean_features <- function( meta, ignore = NULL,
                             remove.lc = TRUE,
-                            uniqueCut = 2, freqCut = 99,
+                            uniqueCut = 1, freqCut = 99,
                             cor = 0.95,
                             verbose = FALSE ) {
 
