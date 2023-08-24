@@ -12,85 +12,88 @@ library(textreg)
 library(knitr)
 library(kableExtra)
 library(quanteda)
+library(tada)
+
 load("Generated Data/meta.RData")
 
-cwords = read.csv("Data/concept_words.csv")
-cwords$Subject=as.factor(cwords$Subject)
-levels(cwords$Subject)=c("science","social")
-cwords$Taught = as.factor(cwords$Taught)
+# Create a data frame containing the concept words identified in the MORE study
+create_cwords <- function() {
+  grade = c(rep(1,23), rep(2,24))
+  subject = c(rep("science", 11), rep("social",12), rep("science", 12), rep("social", 12))
+  concept_word = c('survive', 'species', 'behavior', 'advantage', 'adaptation', 'habitat', 'physical_feature', 'potential', 'unique', 'camouflage', 'diversity',
+                   'expedition', 'discovery', 'obstacle', 'indigenous', 'explorer', 'community', 'persistent', 'ancestor', 'navigation', 'settle', 'celebrate', 'route',
+                   'extinct', 'fossil', 'brutal', 'evidence', 'theory', 'hunter', 'paleontologist', 'carnivore', 'hypothesis', 'organism', 'trait', 'reptile',
+                   'inventor', 'experiment', 'prototype', 'discrimination', 'laboratory', 'engineer', 'ingenious', 'hire', 'approve', 'establish', 'manufacture', 'foundation')
+  taught = c(rep("taught",7), rep("untaught",4),
+             rep("taught",7), rep("untaught", 5),
+             rep("taught", 7), rep("untaught", 5),
+             rep("taught", 7), rep("untaught", 5))
 
-# Create corpus to analyze for concept word frequencies
-tk = quanteda::tokens_ngrams(quanteda::tokens(text$text.sc, remove_punct=T, remove_symbols=T,
-                          remove_numbers=T), n=1:2)
-dfm = quanteda::dfm(tk, select=unique(cwords$Concept_word))
+  # Creating the data frame
+  cwords = data.frame(grade, subject, concept_word, taught)
 
-cwords.freq = cbind(text[,1:4], as.matrix(dfm))
-
-counts = cwords.freq %>% group_by(grade, subject, more) %>%
-  pivot_longer(cols=celebrate:hire, names_to="term",
-               values_to="count")
-
-sci1 = filter(counts, grade==1, subject=="science", term %in%
-                unique(cwords$Concept_word[cwords$Grade==1 & cwords$Subject=="science"]))
-sci2 = filter(counts, grade==2, subject=="science", term %in%
-                unique(cwords$Concept_word[cwords$Grade==2 & cwords$Subject=="science"]))
-
-soc1 = filter(counts, grade==1, subject!="science", term %in%
-                unique(cwords$Concept_word[cwords$Grade==1 & cwords$Subject!="science"]))
-soc2 = filter(counts, grade==2, subject!="science", term %in%
-                unique(cwords$Concept_word[cwords$Grade==2 & cwords$Subject!="science"]))
-
-
-all = rbind(sci1, sci2, soc1, soc2)
-all2 = merge(all, cwords, by.x=c("grade","subject","term"),
-             by.y=c("Grade","Subject","Concept_word"))
-
-sums = all2 %>% group_by(grade, subject, more, Taught) %>%
-  summarise(n=length(unique(s_id)),
-            total.freq = sum(count),
-            num.essays = length(unique(s_id[count>0])),
-            prop.essays = num.essays/n)
-
-
-sums2 = sums %>% group_by(grade, subject, Taught) %>%
-  pivot_wider(names_from=more, values_from=c(total.freq, num.essays, prop.essays,n))
-
-
-sums3 = sums %>% group_by(grade, subject,more)%>%
-  summarise(n=n[1],
-            total.freq=sum(total.freq),
-            num.essays=sum(num.essays),
-            prop.essays=num.essays/n)
-
-
-sums3 = sums3 %>% select(-n) %>%
-  pivot_wider(names_from=more, values_from=c(total.freq, num.essays, prop.essays))
-sums3$Taught="total"
-sums3 = select(sums3, grade, subject, Taught, everything())
-
-
-sums.out = rbind(sums3,sums2[,-c(10:11)])
-
-
-sig.vals=c()
-prev.rates = select(sums2, grade, subject, Taught, num.essays_0, num.essays_1, n_0, n_1)
-res = data.frame(diff=NA, p.val=NA, LL=NA, UL=NA)
-for (j in 1:nrow(sums2)){
-  tmp=prev.rates
-  test = prop.test(x=c(tmp$num.essays_1[j], tmp$num.essays_0[j]),
-                   n=c(tmp$n_1[j], tmp$n_0[j]))
-  diff=test$estimate[1]-test$estimate[2]
-  LL=test$conf.int[1]
-  UL=test$conf.int[2]
-  res[j,] = c(diff, test$p.value, LL, UL)
+  return(cwords)
 }
 
-prev.rates = cbind(prev.rates, res)
-prev.rates$p.adj=p.adjust(prev.rates$p.val,"fdr")
-sums.out = merge(sums.out, subset(prev.rates,select=c(grade,subject,Taught, p.adj,LL,UL)), by=c("grade","subject","Taught"))
+
+textfx_terms = function(x, Z, terms, ...){
+
+  # Determine maximum number of ngrams to search based on the input terms
+  ngrams.terms = stringi::stri_count_words(terms)
+  max.ngrams = 1:max(ngrams.terms)
+
+  # Convert ngrams to quanteda structure with underscores
+  terms = gsub(" ", "_", terms, fixed=T)
+
+  dfm = quanteda::dfm(quanteda::tokens_ngrams(quanteda::tokens(x,...),n=max.ngrams))
+  dfm.terms = as.matrix(quanteda::dfm_match(dfm, terms))
+
+  out = data.frame(Z=Z, dfm.terms, tot=rowSums(dfm.terms))
+  out = out %>% group_by(Z) %>% summarise(n=n(), termfreq=sum(tot), docfreq=sum(tot>0), prop.docs=docfreq/n) %>% arrange(desc(Z))
+
+  # Hypothesis test for difference in proportions between groups
+  test = prop.test(x=out$docfreq, n=out$n)
 
 
-save(sums.out, prev.rates, file="Results/concept_tabs.RData")
+  out1 = out %>% pivot_wider(names_from=Z, values_from=!Z) %>%
+    mutate(diff = test$estimate[1]-test$estimate[2],
+           p.value = test$p.value,
+           LL = test$conf.int[1],
+           UL = test$conf.int[2])
+
+  return(out1)
+
+}
+
+
+
+cwords = create_cwords()
+
+# Analyze separately for taught and untaught terms
+tmp=cwords %>% group_by(grade,subject) %>% do(terms.taught=paste0(.$concept_word[.$taught=="taught"]),
+                                              terms.untaught = paste0(.$concept_word[.$taught=="untaught"]))
+
+text1 = merge(text, tmp, by=c("grade", "subject"))
+
+
+res.taught = text1 %>% group_by(grade, subject) %>% do(tada::textfx_terms(.$text.sc, .$more, unique(unlist(.$terms.taught)))) %>% mutate(type="taught")
+res.untaught = text1 %>% group_by(grade, subject) %>% do(tada::textfx_terms(.$text.sc, .$more, unique(unlist(.$terms.untaught)))) %>% mutate(type="untaught")
+
+
+# combine results across taught and untaught terms and adjust for multiple comparisons
+res = rbind(res.taught, res.untaught)
+res$p.adj = p.adjust(res$p.value, "fdr")
+
+res = res %>% select(grade, subject, type, everything())
+
+
+save(res,file="Results/concept-tabs.RData")
+
+
+
+
+
+
 
 
 
