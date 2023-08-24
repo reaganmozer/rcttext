@@ -20,9 +20,9 @@ levels(cwords$Subject)=c("science","social")
 cwords$Taught = as.factor(cwords$Taught)
 
 # Create corpus to analyze for concept word frequencies
-tk = tokens_ngrams(tokens(text$text.sc, remove_punct=T, remove_symbols=T, 
+tk = quanteda::tokens_ngrams(quanteda::tokens(text$text.sc, remove_punct=T, remove_symbols=T,
                           remove_numbers=T), n=1:2)
-dfm = dfm(tk, select=unique(cwords$Concept_word))
+dfm = quanteda::dfm(tk, select=unique(cwords$Concept_word))
 
 cwords.freq = cbind(text[,1:4], as.matrix(dfm))
 
@@ -45,23 +45,23 @@ all = rbind(sci1, sci2, soc1, soc2)
 all2 = merge(all, cwords, by.x=c("grade","subject","term"),
              by.y=c("Grade","Subject","Concept_word"))
 
-sums = all2 %>% group_by(grade, subject, more, Taught) %>% 
+sums = all2 %>% group_by(grade, subject, more, Taught) %>%
   summarise(n=length(unique(s_id)),
-            total.freq = sum(count), 
+            total.freq = sum(count),
             num.essays = length(unique(s_id[count>0])),
             prop.essays = num.essays/n)
 
 
-sums2 = sums %>% group_by(grade, subject, Taught) %>% 
+sums2 = sums %>% group_by(grade, subject, Taught) %>%
   pivot_wider(names_from=more, values_from=c(total.freq, num.essays, prop.essays,n))
 
 
-sums3 = sums %>% group_by(grade, subject,more)%>% 
+sums3 = sums %>% group_by(grade, subject,more)%>%
   summarise(n=n[1],
             total.freq=sum(total.freq),
             num.essays=sum(num.essays),
-            prop.essays=num.essays/n) 
-  
+            prop.essays=num.essays/n)
+
 
 sums3 = sums3 %>% select(-n) %>%
   pivot_wider(names_from=more, values_from=c(total.freq, num.essays, prop.essays))
@@ -77,7 +77,7 @@ prev.rates = select(sums2, grade, subject, Taught, num.essays_0, num.essays_1, n
 res = data.frame(diff=NA, p.val=NA, LL=NA, UL=NA)
 for (j in 1:nrow(sums2)){
   tmp=prev.rates
-  test = prop.test(x=c(tmp$num.essays_1[j], tmp$num.essays_0[j]), 
+  test = prop.test(x=c(tmp$num.essays_1[j], tmp$num.essays_0[j]),
                    n=c(tmp$n_1[j], tmp$n_0[j]))
   diff=test$estimate[1]-test$estimate[2]
   LL=test$conf.int[1]

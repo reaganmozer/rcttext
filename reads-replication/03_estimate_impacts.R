@@ -59,7 +59,7 @@ est.sci=coeftest( Mod.Sci, vcov. = vcov_clust )
 
 Mod.SS = lm( score_std ~ as.factor(sch_id) + grade +maprit_std + more, data=soc)
 vcov_clust2 = sandwich::vcovCL( Mod.SS, soc$t_id )
-est.soc=coeftest( Mod.SS, vcov. = vcov_clust2 )
+est.soc=lmtest::coeftest( Mod.SS, vcov. = vcov_clust2 )
 
 
 library(emmeans)
@@ -76,10 +76,10 @@ texreg::screenreg(list(est.sci, est.soc),
 
 # Sensitivity check: Clustering at school level (most conservative SE approach)
 vcov_clust_sch = sandwich::vcovCL( Mod.Sci, sci$sch_id )
-est.sci_sch=coeftest( Mod.Sci, vcov. = vcov_clust_sch )
+est.sci_sch=lmtest::coeftest( Mod.Sci, vcov. = vcov_clust_sch )
 
 vcov_clust2_sch = sandwich::vcovCL( Mod.SS, soc$sch_id )
-est.soc_sch=coeftest( Mod.SS, vcov. = vcov_clust2_sch )
+est.soc_sch=lmtest::coeftest( Mod.SS, vcov. = vcov_clust2_sch )
 
 # Relative SEs: about the same
 est.sci_sch[,2] / est.sci[,2]
@@ -96,30 +96,30 @@ texreg::screenreg(list(est.sci, est.sci_sch, est.soc, est.soc_sch),
 
 if (FALSE){
   # Multilevel model for science scores
-  mod.sci = lmer(score_std ~ 1 + grade + #mean.pretest+
+  mod.sci = lme4::lmer(score_std ~ 1 + grade + #mean.pretest+
                    maprit_imp +
                    more + (1|sch_id) + (1|t_id),
                  data=sci)
   summary(mod.sci)
-  mod.sci1 = lmer(score_std ~ 1 + grade + #mean.pretest+
+  mod.sci1 = lme4::lmer(score_std ~ 1 + grade + #mean.pretest+
                     maprit_imp+
                     more + grade*more+ (1|sch_id) + (1|t_id),
                   data=sci)
 
-  lrtest(mod.sci, mod.sci1)
+  lmtest::lrtest(mod.sci, mod.sci1)
 
   # Multilevel model for social scores
-  mod.soc = lmer(score_std ~ 1 + grade + #mean.pretest+
+  mod.soc = lme4::lmer(score_std ~ 1 + grade + #mean.pretest+
                    maprit_imp +
                    more + (1|sch_id) + (1|t_id),
                  data=soc)
 
-  mod.soc1 = lmer(score_std ~ 1 + grade + #mean.pretest+
+  mod.soc1 = lme4::lmer(score_std ~ 1 + grade + #mean.pretest+
                     maprit_imp +
                     more + (grade*more)+ (1|sch_id) + (1|t_id),
                   data=soc )
 
-  lrtest(mod.soc, mod.soc1)
+  lmtest::lrtest(mod.soc, mod.soc1)
 }
 save(Mod.Sci, Mod.SS, est.sci, est.soc, file="results/tx_models.RData")
 
@@ -141,17 +141,17 @@ dat = dplyr::select(all.info, sch_id,t_id,more, maprit_std,subject,
                     grade, spellcheck, lex_TTR:sent_Sixltr, WCperChar)
 
 x = dat[,-c(1:6)]
-names(x)[findLinearCombos(x)$remove]
+names(x)[caret::findLinearCombos(x)$remove]
 dat = select(dat, -meanWordSyllables)
-findCorrelation(cor(dat[,-c(1:6)]),names=T,exact=T,cutoff=0.9)
+caret::findCorrelation(cor(dat[,-c(1:6)]),names=T,exact=T,cutoff=0.9)
 
 dat = select(dat, -Flesch, -ARI,
              -entropy, -lemma_ttr) # remove highly correlated features
-findCorrelation(cor(dat[,-c(1:6)]),names=T,exact=T,cutoff=0.9)
+caret::findCorrelation(cor(dat[,-c(1:6)]),names=T,exact=T,cutoff=0.9)
 x = dat[,-c(1:6)]
 
 # find features with near zero variance
-rm=nearZeroVar(x, uniqueCut = 2, freqCut=99/1, names=T)
+rm=caret::nearZeroVar(x, uniqueCut = 2, freqCut=99/1, names=T)
 sort(apply(dat[,names(dat)%in%rm], 2, function(x)length(unique(x))))
 
 # remove features with near zero variance or high VOF

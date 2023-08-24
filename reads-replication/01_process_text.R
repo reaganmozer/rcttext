@@ -81,7 +81,7 @@ dat2 <- dat3
 
 
 # Clean up some punctuation stuff
-dat2$text.sc = repair_spelling( dat2$text,
+dat2$text.sc = tada::repair_spelling( dat2$text,
                                 c("s's","s'","."),
                                 c("s'","s'",".") )
 dat2$text.sc = iconv(tolower(dat2$text.sc), from="UTF-8", to="ASCII", sub="")
@@ -147,10 +147,10 @@ words = tribble( ~from, ~to,
 
 
 
-dat2$text.sc = repair_spelling( dat2$text.sc, words )
+dat2$text.sc = tada::repair_spelling( dat2$text.sc, words )
 
 # Expand some contractions
-dat2$text.sc = repair_spelling( dat2$text.sc,
+dat2$text.sc = tada::repair_spelling( dat2$text.sc,
                                 c("they're","i'll"),
                                 c("they are","i will") )
 
@@ -173,8 +173,8 @@ dat2$text.sc=tada::apply_hunspell( dat2$text.sc,
 
 
 
-out=textstat_frequency(dfm(dat2$text.sc))
-out$check=hunspell_check(out$feature)
+out=quanteda.textstats::textstat_frequency(dfm(dat2$text.sc))
+out$check=hunspell::hunspell_check(out$feature)
 head(out[out$check==F,],n=20)
 
 

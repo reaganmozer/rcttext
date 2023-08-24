@@ -44,27 +44,27 @@ table( all.feats$xxx )
 
 # Add Word2Vec projections for each essay on 50 dimensions
 load( "../data-raw/glove.50d.RData" )
-all.feats = extract_w2v( clean_text(essay.text),
+all.feats = tada::extract_w2v( clean_text(essay.text),
                          meta = all.feats,
                          model = glove.50d )
 
 
 
 # Add externally computed LIWC-generated features
-all.feats <- extract_liwc("../generated_data/pilot_LIWC.csv",
+all.feats <- tada::extract_liwc("../generated_data/pilot_LIWC.csv",
               meta = all.feats, ID.liwc = 1, ID.meta = "ID",
               clean = FALSE )
 
 
 # And externally computed TAACO features
-all.feats <- extract_taaco("../generated_data/pilot_taaco_results.csv",
+all.feats <- tada::extract_taaco("../generated_data/pilot_taaco_results.csv",
                             meta = all.feats,
                             ID.meta = "ID" )
 
 
 # Drop features we don't need/that are redundant
 dim(all.feats)
-all.feats = clean_features( all.feats,
+all.feats = tada::clean_features( all.feats,
                             ignore = c( "ID",
                                         "writing_quality_score_1",
                                         "writing_quality_score_2",

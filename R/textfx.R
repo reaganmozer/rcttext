@@ -16,9 +16,52 @@
 #' @export
 
 textfx <- function(x, Z,adj=NULL,data,
-                   mcp = "none", wts = NULL,
+                   wts = NULL,
                    design=list(siteID=NULL, clusterID=NULL)){
 
 
 
 }
+
+
+#' Estimates the average treatment effect on the frequency and prevalence of a list of specified terms and phrases
+#'
+#'
+#' @param x A character vector of text documents or a feature matrix returned by \link{tada}
+#' @param Z Indicator for treatment assignment.
+#' @param terms Terms and phrases to evaluate
+#' @param ... optional parameters passed to \link{quanteda::tokens()}
+#' @return A vector showing the frequency and prevalence of the specified terms within each treatment group and results of the hypothesis test comparing prevalence across groups.
+
+#' @export
+
+textfx_terms = function(x, Z, terms, ...){
+
+    # Determine maximum number of ngrams to search based on the input terms
+    ngrams.terms = stringi::stri_count_words(terms)
+    max.ngrams = 1:max(ngrams.terms)
+
+    # Convert ngrams to quanteda structure with underscores
+    terms = gsub(" ", "_", terms, fixed=T)
+
+    dfm = quanteda::dfm(quanteda::tokens_ngrams(quanteda::tokens(x,...),n=max.ngrams))
+    dfm.terms = as.matrix(quanteda::dfm_match(dfm, terms))
+
+    out = data.frame(Z=Z, dfm.terms, tot=rowSums(dfm.terms))
+    out = out %>% group_by(Z) %>% summarise(n=n(), termfreq=sum(tot), docfreq=sum(tot>0), prop.docs=docfreq/n) %>% arrange(desc(Z))
+
+    # Hypothesis test for difference in proportions between groups
+    test = prop.test(x=out$docfreq, n=out$n)
+
+
+    out1 = out %>% pivot_wider(names_from=Z, values_from=!Z) %>%
+      mutate(diff = test$estimate[1]-test$estimate[2],
+             p.value = test$p.value,
+             LL = test$conf.int[1],
+             UL = test$conf.int[2])
+
+    return(out1)
+
+}
+
+
