@@ -19,18 +19,16 @@
 
 plot_textfx= function(out,  alpha=0.05, cols=F, group=T, xlim=NULL, ...){
   out1 = out
-  ord = rep(3,nrow(out1))
+  out1$ord = rep(3,nrow(out1))
   if (group){
-    ord[out1$name%in%c("Analytic","Authentic","Clout","Tone")]=1
-    ord[out1$name%in%c("WC","WPS","TTR","XXX","Sixltr",'Flesch.Kincaid', "Flesch",
+    out1$ord[out1$name%in%c("Analytic","Authentic","Clout","Tone")]=1
+    out1$ord[out1$name%in%c("WC","WPS","TTR","XXX","Sixltr",'Flesch.Kincaid', "Flesch",
                        "R","ARI")]=2
   }
   data("dimnames")
-  out1 = merge(out, dimnames, by="name",all.x=T)
+  out1 = merge(out1, dimnames, by="name",all.x=T)
   out1$fname[is.na(out1$fname)]=out1$name[is.na(out1$fname)]
-  out1$name=out1$fname
-  out1$ord=ord
-  out1 = dplyr::arrange(out1, desc(ord), desc(name))
+  out1 = dplyr::arrange(out1, desc(ord), desc(fname))
 
   ptcols="gray"
   if (cols){ptcols= ifelse(out1$est>0,"blue","red")}
@@ -67,8 +65,8 @@ plot_textfx= function(out,  alpha=0.05, cols=F, group=T, xlim=NULL, ...){
 
 
 
-  axis(side=2,at=y1,labels=out1$name[!which.sigs],las=2,cex.axis=0.875,tcl=-0.25)
-  axis(side=2,at=y2,labels=out1$name[which.sigs],las=2,cex.axis=0.95,tcl=-0.25,
+  axis(side=2,at=y1,labels=out1$fname[!which.sigs],las=2,cex.axis=0.875,tcl=-0.25)
+  axis(side=2,at=y2,labels=out1$fname[which.sigs],las=2,cex.axis=0.95,tcl=-0.25,
        font=2)
 
 }
