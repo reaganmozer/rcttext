@@ -14,8 +14,9 @@ generate_features(
   read = c("ARI", "Coleman", "DRP", "ELF", "Flesch", "Flesch.Kincaid",
     "meanWordSyllables"),
   terms = NULL,
-  preProc = list(uniqueCut = 1, freqCut = 99/1, cor = 0.95, remove.lc = TRUE),
-  verbose = FALSE
+  preProc = list(uniqueCut = 1, freqCut = 99, cor = 0.95, remove.lc = TRUE),
+  verbose = FALSE,
+  ignore = NULL
 )
 }
 \arguments{
@@ -49,6 +50,9 @@ Not cleaned by clean_features.}
 \code{caret::preProcess()} for applying pre-processing
 transformations across the set of text features (e.g., removing
 collinear features).}
+
+\item{ignore}{List of column names to ignore when simplifying
+(e.g., ID column and other columns that should be preserved).}
 
 \item{...}{(optional) additional arguments passed to
 \link{quanteda::tokens()} for text pre-processing.}

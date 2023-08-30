@@ -8,7 +8,7 @@ clean_features(
   meta,
   ignore = NULL,
   remove.lc = TRUE,
-  uniqueCut = 2,
+  uniqueCut = 1,
   freqCut = 99,
   cor = 0.95,
   verbose = FALSE
@@ -34,6 +34,6 @@ clean_features(
 Updated meta with fewer columns of the preserved features.
 }
 \description{
-Given set of generatred features, simplify set of features using
+Given set of generated features, simplify set of features using
 carat package.
 }

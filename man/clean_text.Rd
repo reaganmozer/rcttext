@@ -4,10 +4,13 @@
 \alias{clean_text}
 \title{Generic text cleaning function}
 \usage{
-clean_text(x)
+clean_text(x, split_hyphens = TRUE)
 }
 \arguments{
 \item{x}{Character vector or corpus object.}
+
+\item{split_hyphens}{A logical indicating whether hypenated words should
+be treated as two tokens (split at the hypen).}
 }
 \description{
 Quick and easy text cleaning.  Take given copus and

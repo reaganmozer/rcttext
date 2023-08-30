@@ -10,7 +10,6 @@ textfx(
   Z,
   adj = NULL,
   data,
-  mcp = "none",
   wts = NULL,
   design = list(siteID = NULL, clusterID = NULL)
 )
@@ -26,11 +25,11 @@ adjust for when estimating treatment impacts.}
 \item{data}{A \code{data.frame} of subject-level identifiers, demographic
 variables, group membership, and/or other pre-treatment covariates.}
 
-\item{mcp}{character string specifying the correction method to be applied to adjust for multiple comparisons. Defaults to no adjustments. See \link{p.adjust} for available adjustment methods.}
-
 \item{wts}{Sampling weights for documents.  Assumed uniform if null.}
 
 \item{design}{For multi-site and cluster randomized experiments, a named list of vectors containing site IDs and/or cluster IDs.}
+
+\item{mcp}{character string specifying the correction method to be applied to adjust for multiple comparisons. Defaults to no adjustments. See \link{p.adjust} for available adjustment methods.}
 }
 \value{
 A model object for estimating treatment impact across an array of features.

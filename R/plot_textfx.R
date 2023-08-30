@@ -69,4 +69,5 @@ plot_textfx= function(out,  alpha=0.05, cols=F, group=T, xlim=NULL, ...){
   axis(side=2,at=y2,labels=out1$fname[which.sigs],las=2,cex.axis=0.95,tcl=-0.25,
        font=2)
 
+
 }
