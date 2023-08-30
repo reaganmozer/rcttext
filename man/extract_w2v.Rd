@@ -15,8 +15,8 @@ documents.}
 and non-NULL, all features will be added to this dataframe.}
 
 \item{model}{User-specified model object pointing to a custom
-pre-trained Word2Vec model, represented as a matrix with rownames
-of the words and rows being the embeddings for each word.  If
+pre-trained embedding model, represented as a matrix or data frame where the
+first column is the word/token and the following columns are numeric vectors.  If
 NULL, use default "mini_glove" embeddings on 1000 common words
 (not recommended).}
 }

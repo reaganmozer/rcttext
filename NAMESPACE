@@ -2,6 +2,7 @@
 
 S3method(plot,ccs)
 export(apply_hunspell)
+export(clean_features)
 export(clean_text)
 export(estimate_impacts)
 export(extract_liwc)
