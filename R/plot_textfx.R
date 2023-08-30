@@ -25,7 +25,7 @@ plot_textfx= function(out,  alpha=0.05, cols=F, group=T, xlim=NULL, ...){
     out1$ord[out1$name%in%c("WC","WPS","TTR","XXX","Sixltr",'Flesch.Kincaid', "Flesch",
                             "R","ARI")]=2
   }
-  data("dimnames")
+  dimnames = get_dimnames()
   out1 = merge(out1, dimnames, by="name",all.x=T)
   out1$fname[is.na(out1$fname)]=out1$name[is.na(out1$fname)]
   out1 = dplyr::arrange(out1, desc(ord), desc(fname))
@@ -71,3 +71,30 @@ plot_textfx= function(out,  alpha=0.05, cols=F, group=T, xlim=NULL, ...){
 
 
 }
+
+
+
+
+get_dimnames <- function() {
+  # Create a data frame with 'name' and 'fname' columns
+  df <- data.frame(
+    name = c(
+      "achieve", "adj", "affect", "affiliation", "Analytic", "assent", "Authentic",
+      "cause", "Clout", "cogproc", "conj", "Dic", "discrep", "drives", "family",
+      "female", "Flesch.Kincaid", "focuspast", "leisure", "male", "motion",
+      "posemo", "QMark", "risk", "Sixltr", "social", "tentat", "Tone", "TTR",
+      "WC", "WPS", "XXX", "pronoun_density", "interrog", "all_demonstratives", "informal"
+    ),
+    fname = c(
+      "Achievement", "Adjectives", "Affect", "Affiliation", "Analytical thinking",
+      "Assent", "Authenticity", "Causation", "Clout", "Cognitive proc.", "Conjunctions",
+      "Dictionary", "Discrepancy", "Drives", "Family", "Female", "Readability",
+      "Focus on past", "Leisure", "Male", "Motion", "Positive emotion", "Question marks",
+      "Risk", "Six+ letter terms", "Social proc.", "Tentative", "Emotional tone",
+      "Type-token ratio", "Word count", "Words per sentence", "Illegible terms",
+      "Pronoun density", "Interrogatives", "Demonstratives", "Informal language"
+    )
+  )
+  return(df)
+}
+
