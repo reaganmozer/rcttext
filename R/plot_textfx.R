@@ -22,7 +22,7 @@ plot_textfx= function(out,  alpha=0.05, cols=F, group=T, xlim=NULL, ...){
   out1$ord = rep(3,nrow(out1))
   if (group){
     out1$ord[out1$name%in%c("Analytic","Authentic","Clout","Tone")]=1
-    out1$ord[out1$name%in%c("WC","WPS","TTR","XXX","Sixltr",'Flesch.Kincaid', "Flesch",
+    out1$ord[out1$name%in%c("WC","WPS","TTR","xxx","Sixltr",'Flesch.Kincaid', "Flesch","XXX",
                             "R","ARI")]=2
   }
   dimnames = get_dimnames()
@@ -83,7 +83,7 @@ get_dimnames <- function() {
       "cause", "Clout", "cogproc", "conj", "Dic", "discrep", "drives", "family",
       "female", "Flesch.Kincaid", "focuspast", "leisure", "male", "motion",
       "posemo", "QMark", "risk", "Sixltr", "social", "tentat", "Tone", "TTR",
-      "WC", "WPS", "XXX", "pronoun_density", "interrog", "all_demonstratives", "informal"
+      "WC", "WPS", "XXX","xxx", "pronoun_density", "interrog", "all_demonstratives", "informal","percept"
     ),
     fname = c(
       "Achievement", "Adjectives", "Affect", "Affiliation", "Analytical thinking",
@@ -91,8 +91,8 @@ get_dimnames <- function() {
       "Dictionary", "Discrepancy", "Drives", "Family", "Female", "Readability",
       "Focus on past", "Leisure", "Male", "Motion", "Positive emotion", "Question marks",
       "Risk", "Six+ letter terms", "Social proc.", "Tentative", "Emotional tone",
-      "Type-token ratio", "Word count", "Words per sentence", "Illegible terms",
-      "Pronoun density", "Interrogatives", "Demonstratives", "Informal language"
+      "Type-token ratio", "Word count", "Words per sentence", "Illegible terms","Illegible terms",
+      "Pronoun density", "Interrogatives", "Demonstratives", "Informal language", "Perception"
     )
   )
   return(df)
