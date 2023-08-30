@@ -16,14 +16,15 @@
 #' \insertCite{pennington2014glove}{tada} and returns the mean vector
 #' projection across all words in a document.
 #'
-#' @import tm
+#' @import quanteda
+#' @import dplyr
 #'
 #' @inheritParams generate_features
 #'
 
 #' @param model User-specified model object pointing to a custom
-#'   pre-trained Word2Vec model, represented as a matrix with rownames
-#'   of the words and rows being the embeddings for each word.  If
+#'   pre-trained embedding model, represented as a matrix or data frame where the
+#'   first column is the word/token and the following columns are numeric vectors.  If
 #'   NULL, use default "mini_glove" embeddings on 1000 common words
 #'   (not recommended).
 #' @return A list of data frames containing the Word2Vec projections
@@ -64,16 +65,23 @@ extract_w2v <- function(x,
   } else {
     glove = model
   }
-  dim = ncol(glove)
 
-  glove = tibble::rownames_to_column(as.data.frame(glove),
-                                     var = "word")
+  # Subset to only those terms used in the target text
+  glove.vocab = sort(unique(glove$token))
 
-  #glove.vocab = unique(removePunctuation(names(glove.50d)))
+  dfm = quanteda::dfm(quanteda::tokens(tolower(x)))
+  txt.vocab=sort(unique(colnames(dfm)))
 
-  proj = softmaxreg::wordEmbed(x, dictionary=glove, meanVec=TRUE)
-  proj = as.data.frame(proj)
-  names(proj) = paste0("W2V.d", 1:dim )
+  terms.keep = intersect(glove.vocab, txt.vocab)
+
+  glove.sub = glove %>% filter(token %in% terms.keep) %>% arrange(token)
+  dfm.sub = convert(quanteda::dfm_keep(dfm, terms.keep), to="data.frame") %>% select(all_of(terms.keep))
+
+  stopifnot(all.equal(glove.sub$token, names(dfm.sub))) # check that all the tokens are in the same order
+
+  proj = as.matrix(dfm.sub) %*% (glove.sub %>% select(-token) %>% as.matrix())
+  proj = as.data.frame(proj / rowSums(dfm.sub))
+
 
   if ( !is.null( meta ) ) {
     stopifnot( nrow(meta) == nrow(proj) )
