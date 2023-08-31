@@ -12,31 +12,31 @@
 run_ccs = function( x, Z, clusterID=NULL) {
 
 
-  C = cluster.threshold.C( sc, more_sc, cluster_id=cluster_id, R = 10)
+  C = textreg::cluster.threshold.C( sc, more_sc, cluster_id=cluster_id, R = 10)
   C
   quantile(C,0.80)
   scat( "L2 C: %.2f / %.2f\n", C[[1]], quantile(C,0.80) )
   C_L2 = ceiling( quantile(C,0.80) )
-  res1 = textreg( corpus = sc,
+  res1 = textreg::textreg( corpus = sc,
                   more_sc,
                   C = C_L2,
                   verbosity = 0)
   res1
 
-  res2 = textreg( corpus = sc,
+  res2 = textreg::textreg( corpus = sc,
                   more_sc,
                   C = C_L2, gap=1,
                   verbosity = 0)
   res2
 
-  res3 = textreg( corpus = sc,
+  res3 = textreg::textreg( corpus = sc,
                   more_sc,
                   C = C_L2, binary.features = TRUE,
                   verbosity = 0)
   res3
 
 
-  C = cluster.threshold.C( sc, more_sc, Lq = 3, cluster=cluster_id, R=10 )
+  C = textreg::cluster.threshold.C( sc, more_sc, Lq = 3, cluster=cluster_id, R=10 )
   C
   C_L3 = ceiling( median( C ) )
   quantile(C,0.80)
@@ -51,13 +51,13 @@ run_ccs = function( x, Z, clusterID=NULL) {
 
 
 
-  C = cluster.threshold.C( sc, more_sc, Lq = 1.5, cluster=cluster_id, R=10 )
+  C = textreg::cluster.threshold.C( sc, more_sc, Lq = 1.5, cluster=cluster_id, R=10 )
   C
   quantile(C,0.80)
   C_L1.5 = ceiling( quantile(C,0.80) )
   scat( "L1.5 C: %.2f / %.2f\n", C[[1]], quantile(C,0.80) )
 
-  res5 = textreg( corpus = sc,
+  res5 = textreg::textreg( corpus = sc,
                   more_sc,
                   C = C_L1.5,
                   Lq = 1.5,
@@ -69,7 +69,7 @@ run_ccs = function( x, Z, clusterID=NULL) {
     results[[i]]$model$ngram = gsub( " \\*$", "", results[[i]]$model$ngram )
   }
 
-  tbl = make.list.table( results,
+  tbl = textreg::make.list.table( results,
                          model.names = paste( c("L2","L2 (gap)","L2 (bin)","L3","L1.5"),
                                               round( c(C_L2, C_L2,C_L2,C_L3,C_L1.5),digits=1),
                                               sep="-" ),

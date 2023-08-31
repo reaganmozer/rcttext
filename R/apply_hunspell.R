@@ -41,11 +41,11 @@ apply_hunspell <- function( text,
   vocab = colnames( dfm )
 
   # How many words not recognized?
-  hc <- hunspell_check(vocab,
+  hc <- hunspell::hunspell_check(vocab,
                        hunspell::dictionary("en_US", add_words = additional_words ) )
 
   mis = sort(vocab[hc==FALSE])
-  rm = removePunctuation(mis)==""| removeNumbers(mis)==""| removePunctuation(removeNumbers(mis))==""
+  rm = tm::removePunctuation(mis)==""| tm::removeNumbers(mis)==""| tm::removePunctuation(tm::removeNumbers(mis))==""
 
   if ( !is.null(skip_prefix) ) {
     for ( prf in skip_prefix ) {
@@ -70,7 +70,7 @@ apply_hunspell <- function( text,
   }
 
   spellcorrect = function(x){
-    hunspell_suggest(x)[[1]][1]
+    hunspell::hunspell_suggest(x)[[1]][1]
   }
   subs$h = map_chr(subs$word, spellcorrect)
 

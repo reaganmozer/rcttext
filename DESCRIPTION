@@ -1,4 +1,4 @@
-Package: tada
+Package: rcttext
 Title: Tools for impact analysis in randomized trials with text outcomes
 Version: 0.0.0.9000
 Authors@R: c(
@@ -11,6 +11,13 @@ Imports:
     quanteda,
     textreg,
     sampling,
+    tm,
+    dplyr,
+    caret,
+    quanteda.textstats,
+    plotrix,
+    randomizr,
+    stringi
 RdMacros: Rdpack
 RoxygenNote: 7.2.3
 Depends: 
