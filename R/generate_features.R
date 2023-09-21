@@ -40,7 +40,6 @@
 #'   (e.g., ID column and other columns that should be preserved).
 #' @return A data.frame of available text features, one row per document,
 #'   one column per feature.
-#' @references{ \insertRef{pennington2014glove}{tada} }
 #' @export
 
 generate_features <- function(x,
@@ -150,7 +149,7 @@ generate_features <- function(x,
     #all.feats = clean_features( all.feats,
                                 #ignore = ignore,
                                 #preProc = preProc )
-    all.feats = do.call(tada::clean_features, c(list(meta=all.feats, ignore=ignore),
+    all.feats = do.call(rcttext::clean_features, c(list(meta=all.feats, ignore=ignore),
                                           preProc))
   }
 

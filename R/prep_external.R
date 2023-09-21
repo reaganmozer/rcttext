@@ -23,9 +23,9 @@
 #' @import fs
 #' @import progress
 #'
-#' @references{ \insertRef{liwc2015}{tada}
-#' \insertRef{crossley2016taaco}{tada}
-#' \insertRef{crossley2017sentiment}{tada}}
+#' @references{ \insertRef{liwc2015}{rcttext}
+#' \insertRef{crossley2016taaco}{rcttext}
+#' \insertRef{crossley2017sentiment}{rcttext}}
 #' @export
 
 prep_external = function(x, dir, docnames=NULL, preProc=NULL){

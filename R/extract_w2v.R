@@ -13,7 +13,7 @@
 #'
 #' This function generates a vector embedding for each word in a
 #' string using a set of pre-trained word vectors such as GloVe
-#' \insertCite{pennington2014glove}{tada} and returns the mean vector
+#' \insertCite{pennington2014glove}{rcttext} and returns the mean vector
 #' projection across all words in a document.
 #'
 #' @import quanteda
@@ -30,8 +30,8 @@
 #' @return A list of data frames containing the Word2Vec projections
 #'   of the corpus
 #'
-#' @references{ \insertRef{mikolov2013efficient}{tada}
-#' \insertRef{pennington2014glove}{tada} }
+#' @references{ \insertRef{mikolov2013efficient}{rcttext}
+#' \insertRef{pennington2014glove}{rcttext} }
 #' @export
 extract_w2v <- function(x,
                         meta = NULL,

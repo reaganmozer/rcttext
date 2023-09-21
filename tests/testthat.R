@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/reference/test_package.html#special-files
 
 library(testthat)
-library(tada)
+library(rcttext)
 
-test_check("tada")
+test_check("rcttext")

@@ -2,7 +2,7 @@
 #' estimates for the average treatment effect with respect to an array of text-based outcomes
 #'
 #'
-#' @param x A character vector of text documents or a feature matrix returned by \link{tada}
+#' @param x A character vector of text documents or a feature matrix
 #' @param Z Indicator for treatment assignment.
 #' @param adj (optional) character vector or named list of variables in the data matrix to
 #'   adjust for when estimating treatment impacts.
@@ -27,7 +27,7 @@ textfx <- function(x, Z,adj=NULL,data,
 #' Estimates the average treatment effect on the frequency and prevalence of a list of specified terms and phrases
 #'
 #'
-#' @param x A character vector of text documents or a feature matrix returned by \link{tada}
+#' @param x A character vector of text documents or a feature matrix
 #' @param Z Indicator for treatment assignment.
 #' @param terms Terms and phrases to evaluate
 #' @param ... optional parameters passed to \link{quanteda::tokens()}
