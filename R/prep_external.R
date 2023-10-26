@@ -39,7 +39,7 @@ prep_external = function(x, dir, docnames=NULL, preProc=NULL){
   fs::dir_create(dir)
 
   if (is.null(docnames)){docnames=1:length(x)}
-  fname.out = paste0(dir, docnames)
+  fname.out = paste0(dir, docnames, ".txt")
 
   # Create a text file for each essay to analyze via TAACO
   for (j in 1:length(x)){
