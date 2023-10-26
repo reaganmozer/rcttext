@@ -28,7 +28,7 @@ Tool for Automated Analysis of Cohesion (TAACO) and the Sentiment
 Analysis and Social Cognition Engine (SEANCE).
 }
 \references{
-{ \insertRef{liwc2015}{tada}
-\insertRef{crossley2016taaco}{tada}
-\insertRef{crossley2017sentiment}{tada}}
+{ \insertRef{liwc2015}{rcttext}
+\insertRef{crossley2016taaco}{rcttext}
+\insertRef{crossley2017sentiment}{rcttext}}
 }

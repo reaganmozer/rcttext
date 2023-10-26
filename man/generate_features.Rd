@@ -67,6 +67,3 @@ character vector or \link{quanteda::corpus()} object by applying an
 array of linguistic and syntactic indices, available text analysis
 dictionaries, and pre-trained embedding models to all documents.
 }
-\references{
-{ \insertRef{pennington2014glove}{tada} }
-}

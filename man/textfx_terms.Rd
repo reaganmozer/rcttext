@@ -7,7 +7,7 @@
 textfx_terms(x, Z, terms, ...)
 }
 \arguments{
-\item{x}{A character vector of text documents or a feature matrix returned by \link{tada}}
+\item{x}{A character vector of text documents or a feature matrix}
 
 \item{Z}{Indicator for treatment assignment.}
 
