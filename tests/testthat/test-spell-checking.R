@@ -1,5 +1,6 @@
 
-test_that("multiplication works", {
+
+test_that("spell checking works", {
   data( "toy_reads" )
 
   txt = toy_reads$text
