@@ -17,7 +17,53 @@
 #' @param to_lower If TRUE will keep everything lowercase, regardless
 #'   of spelling suggestions.
 #' @return Vector of text, spell-corrected we hope.
+#' @examples
+#'
+#' ## Example 1: Single string correction
+#'
+#' # Text to be checked for spelling errors
+#' txt = "This function seplaces the textt withh the suggestion"
+#'
+#' # Check for spelling errors and apply replacements
+#' txt_rep = apply_hunspell( txt, verbose=TRUE, threshold = 0 )
+#' txt_rep
+#'
+#' ## Example 2: Multiple texts correction
+#'
+#' # Load example dataframe with multiple texts
+#' data("toy_reads")
+#'
+#' # Extract texts from the dataframe
+#' txts = toy_reads$text
+#' length(txts)
+#'
+#' # Check for spelling errors and apply replacements
+#' txts_rep = apply_hunspell( txts, verbose=TRUE, threshold = 0 )
+#' which( txts_rep != txts )
+#'
+#' # Display original and corrected texts
+#' txts[7]
+#' txts_rep[7]
+#'
+#' txts[20]
+#' txts_rep[20]
+#'
+#' # Check for spelling errors and apply replacements with additional accepted words
+#' txts_rep2 = apply_hunspell( txts,
+#'                             verbose=TRUE,
+#'                             additional_words = c( "dont", "rainforest" ),
+#'                             threshold = 0 )
+#'                             which( txts_rep2 != txts )
+#'
+#' # Display original and corrected texts with additional accepted words
+#' txts[7]
+#' txts_rep2[7]
+#'
+#' txts[20]
+#' txts_rep2[20]
+#'
 #' @export
+
 apply_hunspell <- function( text,
                             additional_words = NULL,
                             skip_prefix = NULL,

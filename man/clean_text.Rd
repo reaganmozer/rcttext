@@ -21,3 +21,41 @@ clean_text is to check which elements of your text
 are converted to empty strings. Empty strings may result in clean_features
 dropping desired columns.
 }
+\exmaples{
+# Texts to be cleaned
+txts = c( "THIS FUNCTION CONVERTS EVERYTHING TO LOWERCASE.",
+          "This function removes punctuation........", 
+          "This function removes     whitespace.",
+          "This-function-splits-hyphens",
+          "The main use for clean_text is to check which elements of 
+           your text are converted to empty strings.",
+          " " )
+
+## Example 1 (convert to lowercase)
+
+txts[1]
+clean_text( txts[1] )
+
+## Example 2 (remove punctuation)
+
+txts[2]
+clean_text( txts[2] )
+
+## Example 3 (remove whitespace)
+
+txts[3]
+clean_text( txts[3] )
+
+## Example 4 (split hyphens)
+
+txts[4]
+clean_text( txts[4] )
+clean_text( txts[4], split_hyphens = FALSE )
+
+## Example 5 (clean entire vector of texts)
+
+clean_text( txts )
+}
+\
+
+

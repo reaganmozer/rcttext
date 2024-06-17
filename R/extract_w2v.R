@@ -21,7 +21,7 @@
 #'
 #' @inheritParams generate_features
 #'
-
+#'
 #' @param model User-specified model object pointing to a custom
 #'   pre-trained embedding model, represented as a matrix or data frame where the
 #'   first column is the word/token and the following columns are numeric vectors.  If
@@ -32,6 +32,21 @@
 #'
 #' @references{ \insertRef{mikolov2013efficient}{rcttext}
 #' \insertRef{pennington2014glove}{rcttext} }
+#'
+#' @examples
+#'
+#' # The txt_data should be a dataframe
+#'
+#' library(textdata)
+#' data("example_meta")
+#'
+#' txt_data = meta
+#' glove.50d = embedding_glove6b(dimensions = 50)
+#'
+#' all.feats = extract_w2v( clean_text( text$text ),
+#'                          meta = txt_data,
+#'                          model = glove.50d )
+#'
 #' @export
 extract_w2v <- function(x,
                         meta = NULL,
