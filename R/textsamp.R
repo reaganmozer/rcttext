@@ -28,67 +28,86 @@
 #' @return Returns either the sampled data or a vector of rownumbers
 #'   of sampled documents.
 #'
-#'#' @examples
+#' @examples
 #'
-#' library(rcttext)
+#' # Load example dataframe
 #' data("toy_reads")
-#' df1 <- textsamp(toy_reads, size = 10)
-#' df2 <- textsamp(toy_reads, size = 4, method = "systematic")
 #'
+#' ## Example 1:Sample 4 documents using the default method
+#' ##           (simple random sampling without replacement)
+#' textamp_df = textsamp(toy_reads, size = 4)
 #'
+#' ## Example 2: Sample 8 documents using Poisson sampling
+#' textamp_df2 = textsamp(toy_reads, size = 8, method = "poisson")
+#'
+#' ## Example 3: Sample 8 documents using systematic sampling,
+#' ##            but only return the row numbers
+#' textamp_df3 = textsamp(toy_reads, size = 8,
+#'                        method = "systematic", return.data = FALSE)
 #' @export
 
-textsamp <- function(x, size = length(x), prob = NULL, wt.fn = NULL, scheme = NULL,
-                     method = c("srswor", "srswr", "systematic", "poisson")) {
+textsamp <- function(x,
+                     size = length(x), prob = NULL, wt.fn = NULL, scheme = NULL,
+                     method = c( "srswor", "srswr", "systematic", "poisson" ),
+                     return.data = TRUE) {
   # Match the specified method with available options
-  method <- match.arg(method, choices = c("srswor", "srswr", "systematic", "poisson"))
+  method <- match.arg(method,
+                      choices = c( "srswor", "srswr", "systematic", "poisson" ))
 
   # Check if the specified sample size is valid
-  if(size < 0 || size > nrow(x)){
+  if( size < 0 || size > nrow(x) ){
     stop("Invalid sample size. Size must be non-negative and less than the number of documents.")
   }
 
   # Generate probability weights using the provided function if prob is NULL
-  if (!is.null(wt.fn) && is.null(prob)) {
+  if ( !is.null( wt.fn ) && is.null( prob ) ) {
     prob <- wt.fn(x)
   }
 
   # Simple Random Sampling Without Replacement
-  if (method == "srswor") {
-    selected <- x[sample(nrow(x), size, replace = FALSE, prob = prob), ]
+  if ( method == "srswor" ) {
+    selected_rows <- sample( nrow( x ), size, replace = FALSE, prob = prob )
+
     # Simple Random Sampling With Replacement
-  } else if (method == "srswr") {
-    selected <- x[sample(nrow(x), size, replace = TRUE, prob = prob), ]
+  } else if ( method == "srswr" ) {
+    selected_rows <- sample( nrow( x ), size, replace = TRUE, prob = prob )
+
     # Poisson Sampling
-  } else if (method == "poisson") {
+  } else if ( method == "poisson" ) {
     # Generate inclusion probabilities for Poisson sampling
-    pik <- sampling::inclusionprobabilities(1:nrow(x), size)
+    pik <- sampling::inclusionprobabilities( 1:nrow( x ), size )
     current_sum <- 0
     target_sum <- size
     # Perform Poisson sampling until the desired number of samples is obtained
-    while (current_sum != target_sum) {
-      s <- sampling::UPpoisson(pik)
-      current_sum <- sum(s == 1)
+    while ( current_sum != target_sum ) {
+      s <- sampling::UPpoisson( pik )
+      current_sum <- sum( s == 1 )
     }
-    selected <- getdata(x, s)
+    selected_rows <- which( s == 1 )
+
     # Systematic Sampling
-  } else if (method == "systematic") {
+  } else if ( method == "systematic" ) {
     # Calculate the step size for systematic sampling
-    step <- ceiling(nrow(x) / size)
+    step <- ceiling( nrow( x ) / size )
     # Randomly select a starting point within the step
-    start <- sample(1:step, 1)
-    # Select the documents based on the systematic sampling scheme
-    selected <- x[seq(start, by = step, length.out = size), ]
+    start <- sample( 1:step, 1 )
+    # Select the row numbers based on the systematic sampling scheme
+    selected_rows <- seq( start, by = step, length.out = size )
   }
-  # Return the selected documents
-  return(selected)
+
+  # Return either the selected data or the row numbers
+  if ( return.data ) {
+    return( x[selected_rows, ] )
+  } else {
+    return( selected_rows )
+  }
 }
 
 #' @rdname textsamp
 #'
 #'   Sample `size` documents from corpus x, stratifying the sample by
 #'   strata defined by unique combinations of passed stratification
-#'   variables.  Say the stratification variables divide the documents
+#'   variables. Say the stratification variables divide the documents
 #'   into K strata. This method will sample $size_k \propto n_k$
 #'   documents from each strata, where $n_k$ is the number of
 #'   documents in stratum $k$.  If these numbers do not divide, this
@@ -108,35 +127,69 @@ textsamp <- function(x, size = length(x), prob = NULL, wt.fn = NULL, scheme = NU
 #'   strata size, as described above.
 #' @param ... additional arguments passed on to `textsamp`. Cannot
 #'   include `scheme`.
+#'
+#' @examples
+#'
+#' # Load example dataframe
+#' data("toy_reads")
+#'
+#' ## Example 1: Stratified Sampling by a Single Variable
+#' stratified_df1 <- textsamp_strata(toy_reads, size = 6, by = "more")
+#'
+#' Example 2: Stratified Sampling by Multiple Variables
+#' stratified_df2 <- textsamp_strata(toy_reads, size = 10,
+#'                                   by = c("Q1", "more"))
+#'
+#' Example 3: Stratified Sampling with Unequal Sample Sizes per Stratum
+#' stratified_df3 <- textsamp_strata(toy_reads, size = 10,
+#'                                   by = "more", equal_size_samples = FALSE)
+#'
 #' @export
-textsamp_strata <- function( x, size, by=NULL,
-                             equal_size_samples = TRUE, ... ) {
-  library(dplyr)
-  if ( is.data.frame( by ) ) {
-    x = bind_cols( x, by )
-    covs = colnames( by )
-  } else {
-    stopifnot( all( by %in% colnames(x)))
-    covs = by
+
+textsamp_strata <- function(x, size, by = NULL, equal_size_samples = FALSE, ...) {
+
+  # Input validation
+  if ( missing( x ) )
+    stop("Argument 'x' (dataframe or corpus) is missing.")
+  if ( missing( size ) )
+    stop("Argument 'size' (number of documents to sample) is missing.")
+  if ( !is.null( by ) && !inherits( by, c( "data.frame", "character" ) ) ) {
+    stop( "'by' must be a data.frame or a character vector of docvar names." )
   }
 
-  K <- x %>% distinct(across(all_of(covs))) %>% nrow() # Count unique combinations of stratification variables
-
-  if (equal_size_samples) {
-    k = round(size / K) # Sample size per stratum for equal sampling
+  # Handle Stratification Variables
+  if ( is.character( by ) ) {
+    stratum_vars <- by
   } else {
-    k = size # Placeholder, actual sample size per stratum calculated within group_by
+    stopifnot( all( by %in% colnames( x ) ) ) # Ensure 'by' variables are in 'x'
   }
 
-  x %>% group_by( across(all_of(covs)) ) %>% # Group by all specified stratification variables
-    { if (!equal_size_samples) { # Conditional sampling based on equal_size_samples
-      slice_sample(., n = round(size * n()/nrow(x))) # Proportional sampling
-    } else {
-      slice_sample(., n = k) # Equal sampling
-    }
-    } %>%
-    ungroup()
+  # Count unique combinations of stratification variables
+  k <- x %>% distinct( across( all_of( stratum_vars ) ) ) %>% nrow()
+
+  # Prepare data for sampling within strata
+  x_grouped <- x %>% group_by( across( all_of( stratum_vars ) ) )
+
+  # Choose between equal or proportional sampling
+  if ( equal_size_samples ) {
+    # Equal-size sampling
+    n_k <- round( size / k ) # Sample size per stratum for equal sampling
+    sampled_data <- x_grouped %>% slice_sample( n = n_k ) # Equal sampling
+  } else {
+
+    # Proportional sampling
+    sampled_data <- x_grouped %>%
+      sample_n(size = round((n() / nrow(x)) * size)) %>%
+      ungroup()
+
+    # props <- x_grouped %>% summarize(prop = n() / nrow(x))  # Calculate proportions
+    # sampled_data <- x_grouped %>%
+    #   sample_n(size = round(props$prop[cur_group_id()] * size)) %>%
+    #   ungroup()
+  }
+  return( sampled_data )
 }
+
 
 
 #' @rdname textsamp
@@ -161,9 +214,15 @@ textsamp_strata <- function( x, size, by=NULL,
 #'   include `scheme`.
 #' @export
 textsamp_cluster <- function(x, size, by = NULL, ...) {
-  if (!is.data.frame(x) && !quanteda::is.corpus(x)) {
-    stop("Input 'x' must be a data.frame or corpus object.")
+  # Input validation (same as in textsamp_strata)
+  if (missing(x)) stop("Argument 'x' (dataframe or corpus) is missing.")
+  if (missing(size)) stop("Argument 'size' (number of documents to sample) is missing.")
+  if (!is.null(by) && !inherits(by, c("data.frame", "character"))) {
+    stop("'by' must be a data.frame or a character vector of docvar names.")
   }
+
+
+
 
   if (is.null(by)) {
     # If no clustering variables are provided, treat all documents as one cluster
