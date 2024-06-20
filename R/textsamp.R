@@ -49,7 +49,7 @@
 textsamp <- function(x,
                      size = length(x), prob = NULL, wt.fn = NULL, scheme = NULL,
                      method = c( "srswor", "srswr", "systematic", "poisson" ),
-                     return.data = TRUE) {
+                     return.data = TRUE, ...) {
   # Match the specified method with available options
   method <- match.arg(method,
                       choices = c( "srswor", "srswr", "systematic", "poisson" ))
@@ -213,51 +213,32 @@ textsamp_strata <- function(x, size, by = NULL, equal_size_samples = FALSE, ...)
 #' @param ... additional arguments passed on to `textsamp`. Cannot
 #'   include `scheme`.
 #' @export
-textsamp_cluster <- function(x, size, by = NULL, ...) {
+
+textsamp_cluster <- function(x, by = NULL, ...) {
   # Input validation (same as in textsamp_strata)
   if (missing(x)) stop("Argument 'x' (dataframe or corpus) is missing.")
-  if (missing(size)) stop("Argument 'size' (number of documents to sample) is missing.")
   if (!is.null(by) && !inherits(by, c("data.frame", "character"))) {
     stop("'by' must be a data.frame or a character vector of docvar names.")
   }
 
-
-
-
-  if (is.null(by)) {
-    # If no clustering variables are provided, treat all documents as one cluster
-    return(textsample(x, size = size, ...))
-  }
-
-  if (is.data.frame(by)) {
-    x <- cbind(x, by)  # Combine data and clustering variables if 'by' is a dataframe
-    cluster_vars <- colnames(by)
-  } else {
-    if (!all(by %in% colnames(x))) {
-      stop("Cluster variables not found in the data.")
-    }
+  # Handle Clustering Variables
+  if ( is.character( by ) ) {
     cluster_vars <- by
+  } else {
+    stopifnot( all( by %in% colnames( x ) ) ) # Ensure 'by' variables are in 'x'
   }
 
-  # Count unique clusters
-  num_clusters <- x %>%
-    select(all_of(cluster_vars)) %>%
-    distinct() %>%
-    nrow()
+  # Count unique combinations of clustering variables (clusters)
+  k <- x %>% distinct(across(all_of(cluster_vars))) %>% nrow()
 
-  # Calculate sample size per cluster
-  sample_per_cluster <- round(size / num_clusters)
+  # Calculate the target sample size per cluster
+  n_k <- round(nrow(x) / k)
 
-  # Sample within each cluster
+  # Group by clustering variables, then sample within each group (needs to fix!)
   sampled_data <- x %>%
     group_by(across(all_of(cluster_vars))) %>%
-    slice_sample(n = sample_per_cluster) %>%
+    slice_sample(n = n_k) %>%
     ungroup()
-
-  # If x is a corpus, convert sampled_data back to corpus
-  if (quanteda::is.corpus(x)) {
-    sampled_data <- quanteda::corpus(sampled_data)
-  }
 
   return(sampled_data)
 }

@@ -36,7 +36,54 @@
 #'  * `caret::train`: The underlying function used for model training.
 #'
 #' @examples
-#' \dontrun{}
+#'
+#' # Load texts
+#' data("toy_reads")
+#'
+#' # Generate text features
+#' feats = generate_features( toy_reads$text, meta=toy_reads,
+#'                            sent = TRUE,
+#'                            clean_features = TRUE,
+#'                            read = c("Flesch","Flesch.Kincaid", "ARI"),
+#'                            ld=c("TTR","R","K"),
+#'                            ignore=c("ID"),
+#'                            verbose = TRUE )
+#'
+#' # Preprocess the feature space to remove collinear features
+#' # and features with near-zero variance
+#' X_all = dplyr::select( feats,
+#'                        -ID, -Q1, -Q2, -text, -more )
+#' X_all = predict(caret::preProcess( X_all, method = c("nzv","corr"),
+#'                                    uniqueCut=2, cutoff=0.95), X_all )
+#' caret::findLinearCombos(X_all) # sanity check to make sure no redundant features
+#'
+#' # Transform all variables as numeric variables
+#' X_all[] <- lapply(X_all,
+#'                   function(x) if(is.character(x)) as.numeric(as.factor(x)) else x)
+#'
+#' # Extract outcome variables
+#' all_Scores <- toy_reads$Q1
+#'
+#' ## Set parameters
+#' X <- X_all
+#' Y <- all_Scores
+#' n_iter <- 2
+#' n_tune <- 2
+#' control <- caret::trainControl(method = 'cv')
+#' preProc <- 'zv'
+#' outcome <- 'continuous'
+#' portion <- 0.7
+#' best_mod <- 'rf'
+#'
+#' ## Run ML_iteration
+#' random_forest_Score = ML_iteration (x = X, y = Y,
+#'                                     n_iteration = n_iter,
+#'                                     training_portion = portion,
+#'                                     trCon = control,
+#'                                     preProc = preProc,
+#'                                     n.tune = n_tune,
+#'                                     model = best_mod,
+#'                                     outcome = outcome)
 #'
 #' @export
 
@@ -150,7 +197,6 @@ ML_iteration = function ( x,
   return(results_list)
 }
 
-
 #' @rdname ML_iteration
 #' Iterative Machine Learning Across Multiple Training Set Sizes
 #'
@@ -199,7 +245,56 @@ ML_iteration = function ( x,
 #'  * `caret::train`: The underlying function used for model training.
 #'
 #' @examples
-#' \dontrun{}
+#'
+#' # Load texts
+#' data("toy_reads")
+#'
+#' # Generate text features
+#' feats = generate_features( toy_reads$text, meta=toy_reads,
+#'                            sent = TRUE,
+#'                            clean_features = TRUE,
+#'                            read = c("Flesch","Flesch.Kincaid", "ARI"),
+#'                            ld=c("TTR","R","K"),
+#'                            ignore=c("ID"),
+#'                            verbose = TRUE )
+
+#' # Preprocess the feature space to remove collinear features
+#' # and features with near-zero variance
+#' X_all = dplyr::select( feats,
+#'                        -ID, -Q1, -Q2, -text, -more )
+#' X_all = predict(caret::preProcess( X_all, method = c("nzv","corr"),
+#'                                    uniqueCut=2, cutoff=0.95), X_all )
+#' caret::findLinearCombos(X_all) # sanity check to make sure no redundant features
+#'
+#' # Transform all variables as numeric variables
+#' X_all[] <- lapply(X_all,
+#'                   function(x) if(is.character(x)) as.numeric(as.factor(x)) else x)
+#'
+#' # Extract outcome variables
+#' all_Scores <- toy_reads$Q1
+#'
+#' ## Set parameters
+#' X <- X_all
+#' Y <- all_Scores
+#' n_iter <- 2
+#' n_tune <- 2
+#' control <- caret::trainControl(method = 'cv')
+#' preProc <- 'zv'
+#' outcome <- 'continuous'
+#' best_mod <- 'rf'
+#'
+#' ## Define the percentages for training portions
+#' percentages <- c(.20, 0.40, 0.60, 0.80)
+#'
+#' ## Loop through each percentage
+#' random_forest_Scores = ML_iterations (x = X, y = Y,
+#'                                       n_iteration = n_iter,
+#'                                       training_portions = percentages,
+#'                                       trCon = control,
+#'                                       preProc = preProc,
+#'                                       n.tune = n_tune,
+#'                                       model = best_mod,
+#'                                       outcome = outcome)
 #'
 #' @export
 
@@ -234,8 +329,87 @@ ML_iterations = function ( x,
   return(results)
 }
 
-# Provide average values of evaluation metrics ----
-
+#' @rdname ML_iteration
+#' Evaluate Metrics for Machine Learning Iterations
+#'
+#' This function calculates evaluation metrics for the results of
+#' machine learning iterations. Depending on the type of outcome variable
+#' (continuous or categorical), the function computes different sets of metrics
+#' and returns them in a summarized format.
+#'
+#' @param result A list of results from `ML_iteration` or `ML_iterations`.
+#' Each element of the list should be a list containing
+#' the results of a single iteration, including the calculated metrics.
+#' @param outcome Type of outcome variable: either "continuous"
+#' for continuous outcomes or "categorical" for categorical outcomes.
+#' @return A data frame containing the evaluation metrics.
+#' For continuous outcomes, the metrics include:
+#'   - `rmse`: Root Mean Squared Error
+#'   - `r_squared`: R-squared value
+#'   - `mae`: Mean Absolute Error
+#'
+#'   For categorical outcomes, the metrics include:
+#'   - `accuracy`: Accuracy
+#'   - `accuracy_ll`: Lower limit of the accuracy confidence interval
+#'   - `accuracy_ul`: Upper limit of the accuracy confidence interval
+#'   - `uwk`: Unweighted kappa
+#'   - `qwk`: Quadratic weighted kappa
+#'
+#'@examples
+#'
+#' # Load texts
+#' data("toy_reads")
+#'
+#' # Generate text features
+#' feats = generate_features( toy_reads$text, meta=toy_reads,
+#'                            sent = TRUE,
+#'                            clean_features = TRUE,
+#'                            read = c("Flesch","Flesch.Kincaid", "ARI"),
+#'                            ld=c("TTR","R","K"),
+#'                            ignore=c("ID"),
+#'                            verbose = TRUE )
+#'
+#' # Preprocess the feature space to remove collinear features
+#' # and features with near-zero variance
+#' X_all = dplyr::select( feats,
+#'                        -ID, -Q1, -Q2, -text, -more )
+#' X_all = predict(caret::preProcess( X_all, method = c("nzv","corr"),
+#'                                    uniqueCut=2, cutoff=0.95), X_all )
+#' caret::findLinearCombos(X_all) # sanity check to make sure no redundant features
+#'
+#' # Transform all variables as numeric variables
+#' X_all[] <- lapply(X_all,
+#'                   function(x) if(is.character(x)) as.numeric(as.factor(x)) else x)
+#'
+#' # Extract outcome variables
+#' all_Scores <- toy_reads$Q1
+#'
+#' ## Set parameters
+#' X <- X_all
+#' Y <- all_Scores
+#' n_iter <- 2
+#' n_tune <- 2
+#' control <- caret::trainControl(method = 'cv')
+#' preProc <- 'zv'
+#' outcome <- 'continuous'
+#' best_mod <- 'rf'
+#'
+#' ## Define the percentages for training portions
+#' percentages <- c(.20, 0.40, 0.60, 0.80)
+#'
+#' ## Loop through each percentage
+#' random_forest_Scores = ML_iterations (x = X, y = Y,
+#'                                       n_iteration = n_iter,
+#'                                       training_portions = percentages,
+#'                                       trCon = control,
+#'                                       preProc = preProc,
+#'                                       n.tune = n_tune,
+#'                                       model = best_mod,
+#'                                       outcome = outcome)
+#' ## Evaluate the metrics
+#' eval_metrics(random_forest_Scores, outcome = outcome)
+#'
+#'@export
 eval_metrics = function (result = NULL,
                          outcome = NULL) {
   if (outcome == "continuous") {
