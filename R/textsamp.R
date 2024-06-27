@@ -15,6 +15,9 @@
 #' @param prob a vector of probability weights for each document.
 #' @param wt.fn a function for generating probability weights; ignored
 #'   when \code{prob} is used. See Details.
+#' @param sampling the type of sampling to perform. Options include 'strata' and 'cluster'.
+#' @param sampling_control A list containing control parameters
+#'   for the specified sampling method (see details)
 #' @param method the following methods are implemented: simple random
 #'   sampling without replacement (`srswor`), simple random sampling
 #'   with replacement (`srswr`), Poisson sampling (`poisson`),
@@ -27,6 +30,16 @@
 #'   numbers corresponding to the sampled documents.
 #' @return Returns either the sampled data or a vector of rownumbers
 #'   of sampled documents.
+#'
+#' @details
+#' For stratified sampling (`sampling = "strata"`), `sampling_control` should be a list with:
+#'   * `by`: A character vector of column names in `x` to define the strata.
+#'   * `equal_size_samples`: Logical. If TRUE, sample equal numbers from each stratum.
+#'
+#' For cluster sampling (`sampling = "cluster"`), `sampling_control` should be a list with:
+#'   * `by`: A character vector of column names in `x` to define the clusters.
+#'   * `n_clusters`: The number of clusters to sample.
+#'   * `cluster_size`: (Optional) The number of documents to sample from each cluster.
 #'
 #' @examples
 #'
@@ -46,15 +59,29 @@
 #'                        method = "systematic", return.data = FALSE)
 #' @export
 
+data(swissmunicipalities)
+x = swissmunicipalities
+size = 30
+prob = NULL
+wt.fn = NULL
+scheme = NULL
+sampling = "strata"
+sampling_control = list(by = 'REG', equal_size_samples = TRUE)
+method = "srswor"
+
+
 textsamp <- function(x,
-                     size = length(x), prob = NULL, wt.fn = NULL, scheme = NULL,
+                     size = NULL, prob = NULL, wt.fn = NULL, scheme = NULL,
+                     sampling = NULL,
+                     sampling_control = NULL,
                      method = c( "srswor", "srswr", "systematic", "poisson" ),
-                     return.data = TRUE, ...) {
+                     return.data = TRUE, ... ) {
   # Match the specified method with available options
-  method <- match.arg(method,
-                      choices = c( "srswor", "srswr", "systematic", "poisson" ))
+  method <- match.arg( method,
+                       choices = c( "srswor", "srswr", "systematic", "poisson" ))
 
   # Check if the specified sample size is valid
+  if (is.null(size)) stop("Argument 'size' (number of documents to sample) is missing.")
   if( size < 0 || size > nrow(x) ){
     stop("Invalid sample size. Size must be non-negative and less than the number of documents.")
   }
@@ -62,6 +89,31 @@ textsamp <- function(x,
   # Generate probability weights using the provided function if prob is NULL
   if ( !is.null( wt.fn ) && is.null( prob ) ) {
     prob <- wt.fn(x)
+  }
+
+  # Sampling Logic
+  if (is.null(sampling)) {
+    # No stratification or clustering
+    x <- x
+
+  } else {
+    # Stratified or clustered sampling
+    if (sampling == "strata") {
+      if (is.null(sampling_control)) stop("`sampling_control` must be provided for stratified sampling.")
+      x <- textsamp_strata(x, size, by = sampling_control$by,
+                           equal_size_samples = sampling_control$equal_size_samples)
+
+    } else if (sampling == "cluster") {
+      if (is.null(sampling_control)) stop("`sampling_control` must be provided for cluster sampling.")
+      if (is.null(sampling_control$n_clusters)) {
+        stop("Argument 'n_clusters' (number of clusters to sample) is required for clustered sampling.")
+      }
+      x <- textsamp_cluster(x, by = sampling_control$by,
+                            n_clusters = sampling_control$n_clusters,
+                            cluster_size = sampling_control$cluster_size)
+    } else {
+      stop("Invalid sampling type. Choose 'strata' or 'cluster'.")
+    }
   }
 
   # Simple Random Sampling Without Replacement
@@ -110,7 +162,7 @@ textsamp <- function(x,
 #'   variables. Say the stratification variables divide the documents
 #'   into K strata. This method will sample $size_k \propto n_k$
 #'   documents from each strata, where $n_k$ is the number of
-#'   documents in stratum $k$.  If these numbers do not divide, this
+#'   documents in stratum $k$. If these numbers do not divide, this
 #'   method will sample the closest integer number of documents to the
 #'   given proportion.
 #'
@@ -153,11 +205,11 @@ textsamp_strata <- function(x, size, by = NULL, equal_size_samples = FALSE, ...)
     stop("Argument 'x' (dataframe or corpus) is missing.")
   if ( missing( size ) )
     stop("Argument 'size' (number of documents to sample) is missing.")
-  if ( !is.null( by ) && !inherits( by, c( "data.frame", "character" ) ) ) {
-    stop( "'by' must be a data.frame or a character vector of docvar names." )
+  if ( !is.null( by ) && !inherits( by, c( "variable", "character" ) ) ) {
+    stop( "'by' must be variable(s) of a data.frame or a character vector of docvar names." )
   }
 
-  # Handle Stratification Variables
+  # Handle stratification variables
   if ( is.character( by ) ) {
     stratum_vars <- by
   } else {
@@ -191,16 +243,16 @@ textsamp_strata <- function(x, size, by = NULL, equal_size_samples = FALSE, ...)
 }
 
 
-
 #' @rdname textsamp
 #'
-#'   This method will attempt to sample an equal number of documents
-#'   from each cluster defined by the unique combination of the passed
-#'   clustering variables.
+#'   This method will attempt to sample certain number of clusters of documents
+#'   from data (simple random clustering) at first
+#'   and then sampling an equal number of documents from each selected cluster.
+#'   defined by the unique combination of the passed clustering variables.
 #'
-#'   In particular, this method will sample $round( size / K )$
+#'   (In particular, this method will sample $round( size / K )$
 #'   documents from each cluster, where K is the total number of
-#'   clusters.
+#'   clusters.) - sounds like equal_size_samples within stratified sampling - n
 #'
 #'   If multiple clustering variables are passed, this will make
 #'   clusters as all the _unique_ combinations of these variables.
@@ -210,38 +262,64 @@ textsamp_strata <- function(x, size, by = NULL, equal_size_samples = FALSE, ...)
 #' @param by a \code{data.frame} with document-level grouping
 #'   variable(s) or character vector with names of variables in
 #'   `docvars(x)`
+#' @param n_clusters The number of clusters to sample.
+#'   If not provided, an error will be thrown.
+#' @param size The number of documents to sample across all clusters.
+#'   If NULL, all documents will be sampled from each selected cluster.
+#' @param n_cluster the number of clusters to sample from data
+#' @param cluster_size The number of documents to sample from each selected cluster.
+#' If NULL, all documents within each cluster will be sampled.
 #' @param ... additional arguments passed on to `textsamp`. Cannot
 #'   include `scheme`.
 #' @export
 
-textsamp_cluster <- function(x, by = NULL, ...) {
-  # Input validation (same as in textsamp_strata)
-  if (missing(x)) stop("Argument 'x' (dataframe or corpus) is missing.")
-  if (!is.null(by) && !inherits(by, c("data.frame", "character"))) {
-    stop("'by' must be a data.frame or a character vector of docvar names.")
+textsamp_cluster <- function(x, by = NULL, n_clusters, cluster_size = NULL, ...) {
+
+  # Input validation
+  if (missing(x)) {
+    stop("Argument 'x' (corpus object or dataframe) is missing.")
+  }
+  if (missing(n_clusters)) {
+    stop("Argument 'n_clusters' (number of clusters to sample) is missing.")
+  }
+  if ( !is.null( by ) && !inherits( by, c( "variable", "character" ) ) ) {
+    stop( "'by' must be a variable(s) of a data.frame or a character vector of docvar names." )
   }
 
-  # Handle Clustering Variables
-  if ( is.character( by ) ) {
+  # Handle clustering variables
+  if (is.character(by)) {
     cluster_vars <- by
   } else {
-    stopifnot( all( by %in% colnames( x ) ) ) # Ensure 'by' variables are in 'x'
+    stopifnot(all(by %in% colnames(x)))
   }
 
-  # Count unique combinations of clustering variables (clusters)
-  k <- x %>% distinct(across(all_of(cluster_vars))) %>% nrow()
+  # Get unique cluster IDs
+  clusters <- x %>% distinct(across(all_of(cluster_vars)))
 
-  # Calculate the target sample size per cluster
-  n_k <- round(nrow(x) / k)
+  # Check if enough clusters exist for sampling
+  if(n_clusters > nrow(clusters)) {
+    stop("There are not enough unique clusters in the data to sample the specified number.")
+  }
 
-  # Group by clustering variables, then sample within each group (needs to fix!)
-  sampled_data <- x %>%
-    group_by(across(all_of(cluster_vars))) %>%
-    slice_sample(n = n_k) %>%
-    ungroup()
+  # Sample the specified number of clusters
+  sampled_clusters <- clusters %>% slice_sample(n = n_clusters)
+
+  # Sample documents (Within or Across Clusters)
+  if (is.null(cluster_size)) {
+    # Sample all documents from the selected clusters
+    sampled_data <- x %>%
+      right_join(sampled_clusters, by = cluster_vars) %>%
+      group_by(across(all_of(cluster_vars))) %>%
+      ungroup()
+
+   } else {
+     # Sample a fixed number of documents within each selected cluster
+      sampled_data <- x %>%
+        right_join(sampled_clusters, by = cluster_vars) %>%
+        group_by(across(all_of(cluster_vars))) %>%
+        slice_sample(n = cluster_size) %>%
+        ungroup()
+    }
 
   return(sampled_data)
 }
-
-
-

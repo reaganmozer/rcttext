@@ -24,3 +24,48 @@ train_ensemble <- function(x, y, z=NULL, n.tune=3, cvf=5,
   return(tmp)
 
 }
+
+train_ensemble = function( X, Z, Yobs, coded, n.tune = 3, bounds=NULL, preProc="zv",
+                           model = "rf",seeds=NA,...
+) {
+
+
+  # Remove s_id and sampling weights from feature set for prediction
+  population = data.frame(Z,Yobs,X)
+  population$Yobs = as.numeric(population$Yobs)
+
+
+  train = subset(population, coded==1)
+  train0 = subset(train[train$Z==0,],select=-c(Z))
+  train1 = subset(train[train$Z==1,],select=-c(Z))
+
+  registerDoParallel(10)
+
+  control0 = caret::trainControl(method="cv", number=5,
+                                 savePredictions="final",
+                                 predictionBounds = bounds,
+                                 allowParallel=T,seeds=seeds)
+  control1 = caret::trainControl(method="cv", number=5,
+                                 savePredictions="final",
+                                 predictionBounds = bounds,
+                                 allowParallel=T,seeds=seeds)
+
+
+
+  coded.X0 = as.matrix(subset(train0,select=-c(Yobs)))
+  coded.X1 = as.matrix(subset(train1,select=-c(Yobs)))
+
+
+  mod0 = caret::train(x=coded.X0, y=train0$Yobs,trControl=control0, preProcess=preProc,
+                      tuneLength=n.tune, method=model,...)
+
+  mod1 = caret::train(x=coded.X1, y=train1$Yobs,trControl=control1, preProcess=preProc,
+                      tuneLength=n.tune, method=model,...)
+
+
+
+  fit = list(mod0=mod0, mod1=mod1, coded=coded)
+
+
+  return(fit)
+}
