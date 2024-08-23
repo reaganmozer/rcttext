@@ -2,19 +2,19 @@ library(rcttext)
 ### Remember
 
 # generate_features is dependent on clean_features.
-# apply_hunsepp is dependent on repair_spelling.
+# apply_hunspell is dependent on repair_spelling.
 # extract_liwc is dependent on the LIWC program.
 # extract_tacco is dependent on the tacco program.
-# apply_hunsepll's to_lower parameter? similar with clean_text 
+# apply_hunsepll's to_lower parameter? similar with clean_text
 
 ### apply_hunspell example ----
 
-## Example 1
+## Example 1: Single string correction
 
 # Text to be checked for spelling errors
 txt = "This function seplaces the textt withh the suggestion"
 
-# Check for spelling errors and apply replacements 
+# Check for spelling errors and apply replacements
 txt_rep = apply_hunspell( txt, verbose=TRUE, threshold = 0 )
 txt_rep
 
@@ -27,7 +27,7 @@ data("toy_reads")
 txts = toy_reads$text
 length(txts)
 
-# Check for spelling errors and apply replacements 
+# Check for spelling errors and apply replacements
 txts_rep = apply_hunspell( txts, verbose=TRUE, threshold = 0 )
 which( txts_rep != txts )
 
@@ -52,23 +52,23 @@ txts_rep2[7]
 txts[20]
 txts_rep2[20]
 
-### genearate_features example ----
+### generate_features example ----
 
-# This function does not work with the dataframe with 1 object. 
-# 'meta' should be a dataframe. 
+# This function does not work with the dataframe with 1 object.
+# 'meta' should be a dataframe.
 
 ## Example 1
 
-# Create a dataframe with 2 texts (objects). 
+# Create a dataframe with 2 texts (objects).
 df = data.frame(
-  text = c( "This function generates an array of text features", 
-            "This function generates a rich feature representation as a character 
-             vector or quanteda::corpus() object by applying an array of linguistic 
+  text = c( "This function generates an array of text features",
+            "This function generates a rich feature representation as a character
+             vector or quanteda::corpus() object by applying an array of linguistic
              and syntactic indices" ))
 
-# Generated text features without simplfying the set of features 
-feats1 = generate_features( df$text, 
-                            meta = df,  
+# Generated text features without simplfying the set of features
+feats1 = generate_features( df$text,
+                            meta = df,
                             clean_features = FALSE )
 
 
@@ -78,14 +78,14 @@ feats1 = generate_features( df$text,
 data( "toy_reads" )
 
 # Generate text features without simplifying the set of features
-feats2 = generate_features( toy_reads$text, 
-                            meta=toy_reads, 
-                            clean_features = FALSE, 
+feats2 = generate_features( toy_reads$text,
+                            meta=toy_reads,
+                            clean_features = FALSE,
                             ignore = "ID" )
 
-# Generate preliminary text features, 
+# Generate preliminary text features,
 # simplifying the set of features and specifying sent, read, ld
-feats3 = generate_features( toy_reads$text, meta=toy_reads, 
+feats3 = generate_features( toy_reads$text, meta=toy_reads,
                             sent = TRUE,
                             clean_features = TRUE,
                             read = c("Flesch","Flesch.Kincaid", "ARI"),
@@ -93,16 +93,55 @@ feats3 = generate_features( toy_reads$text, meta=toy_reads,
                             ignore=c("ID"),
                             verbose = TRUE )
 
+### clean_features example ----
+
+
+## Example 1
+# Create a 10x20 matrix with random numbers between 0 and 1
+random_matrix <- matrix(runif(200), nrow = 10, ncol = 20)
+
+# Create a 10x20 dataframe with random numbers between 0 and 1
+random_df <- data.frame(matrix(runif(200), nrow = 10, ncol = 20))
+
+# Apply the clean_features function to the matrix
+cleaned_matrix <- clean_features(random_matrix)
+
+# Apply the clean_features function to the dataframe
+# and convert back to dataframe
+cleaned_df <- data.frame(clean_features(random_df))
+
+## Example 2
+# Apply the clean_features function with a correlation cutoff (0.10)
+cleaned_matrix <- clean_features(random_matrix, cor = 0.10)
+
+# Apply the clean_features function to the dataframe
+# with a correlation cutoff (0.90)
+# This will remove more features due to the higher correlation threshold
+cleaned_df <- data.frame(clean_features(random_df, cor = 0.50))
+
+
+clean_features <- function( meta, ignore = NULL,
+                            remove.lc = TRUE,
+                            uniqueCut = 1, freqCut = 99,
+                            cor = 0.95,
+                            verbose = FALSE ) {
+
+
+# View the dataframe
+print(random_df)
+
+
+
 ### clean_text example ----
 
-## Typo correction: given copus x -> given corpus
+## Typo correction: given corpus x -> given corpus
 
 # Texts to be cleaned
 txts = c( "THIS FUNCTION CONVERTS EVERYTHING TO LOWERCASE.",
-          "This function removes punctuation........", 
+          "This function removes punctuation........",
           "This function removes     whitespace.",
           "This-function-splits-hyphens",
-          "The main use for clean_text is to check which elements of 
+          "The main use for clean_text is to check which elements of
            your text are converted to empty strings.",
           " " )
 
@@ -181,4 +220,4 @@ all.feats = extract_w2v( clean_text( txt_data$text ),
                          meta = txt_data,
                          model = glove.50d )
 
-
+###

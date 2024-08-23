@@ -21,7 +21,7 @@
 #' @param sent Logical, indicating whether to compute sentiment
 #'   analysis features from available dictionaries
 #' @param clean_features TRUE means implement cleaning step where we
-#'   drop features with no variation and colinear features. (This
+#'   drop features with no variation and collinear features. (This
 #'   happens before any term generation features are added.)
 #' @param ld character vector defining lexical diversity measures to
 #'   compute; see \link{quanteda.textstats::textstat_lexdiv()}

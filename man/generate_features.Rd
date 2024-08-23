@@ -36,7 +36,7 @@ analysis features from available dictionaries}
 compute; see \link{quanteda.textstats::textstat_lexdiv()}}
 
 \item{clean_features}{TRUE means implement cleaning step where we
-drop features with no variation and colinear features. (This
+drop features with no variation and collinear features. (This
 happens before any term generation features are added.)}
 
 \item{read}{character vector defining readability measures to
@@ -66,4 +66,46 @@ Generates a rich feature representation for documents provided as a
 character vector or \link{quanteda::corpus()} object by applying an
 array of linguistic and syntactic indices, available text analysis
 dictionaries, and pre-trained embedding models to all documents.
+}
+\examples{
+
+# Note: This function does not work with the dataframe with 1 object.
+# The 'meta' argument requires a dataframe with at least two rows
+
+## Example 1: Basic Feature Generation
+
+# Create a small dataframe with 2 texts (objects).
+df = data.frame(
+ text = c( "This function generates an array of text features",
+           "This function generates a rich feature representation as a character
+            vector or quanteda::corpus() object by applying an array of linguistic
+            and syntactic indices" ))
+
+# Generated text features without simplifying the set of features
+feats1 = generate_features( df$text,
+                            meta = df,
+                            clean_features = FALSE )
+
+
+## Example 2: Feature Generation with Example Data and Customization
+
+# Load example dataframe with multiple texts
+data( "toy_reads" )
+
+# Generate text features without simplifying the set of features
+feats2 = generate_features( toy_reads$text,
+                            meta=toy_reads,
+                            clean_features = FALSE,
+                            ignore = "ID" )
+
+# Generate preliminary text features,
+# simplifying the set of features and specifying sent, read, ld
+feats3 = generate_features( toy_reads$text, meta=toy_reads,
+                            sent = TRUE,
+                            clean_features = TRUE,
+                            read = c("Flesch","Flesch.Kincaid", "ARI"),
+                            ld=c("TTR","R","K"),
+                            ignore=c("ID"),
+                            verbose = TRUE )
+
 }

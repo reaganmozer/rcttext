@@ -26,3 +26,22 @@ ID.liwc.}
 Functions for processing and appending output from Linguistic
 Inquiry Word Count (LIWC) software
 }
+\examples{
+# This function extracts features from a LIWC-generated-generated data
+# (CSV or dataframe).
+# The txt_data should be a dataframe
+# and have the same column name(s) as "reads_liwc".
+
+data("reads_liwc")
+data("example_meta")
+
+reads_liwc = reads_liwc
+txt_data = meta
+
+all.feats = extract_liwc( file = "reads_liwc",
+                          meta = txt_data,
+                          ID.liwc = c( "ID" ),
+                          ID.meta = c( "ID" ),
+                          clean = FALSE )
+
+}

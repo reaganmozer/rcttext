@@ -48,3 +48,20 @@ The "Filename" column in the read file should be the IDs (with a
 '.txt' suffix that will be dropped).  The results can then be
 merged with `meta`, if passed,
 }
+\examples{
+# This function extracts features from a TAACO-generated data
+# (CSV or dataframe).
+# The txt_data should be a dataframe
+# and have the same column name(s) as "reads_tacco"
+
+data("reads_taaco")
+data("example_meta")
+
+reads_tacco = reads_taaco
+txt_data = meta
+
+all.feats = extract_taaco( "reads_taaco",
+                            meta = txt_data,
+                            ID.meta = "ID" )
+
+}

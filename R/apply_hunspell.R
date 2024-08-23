@@ -71,9 +71,9 @@ apply_hunspell <- function( text,
                             to_lower = FALSE,
                             verbose = FALSE ) {
 
-  library(quanteda)
-  library(hunspell)
-  library(tm)
+  library( quanteda )
+  library( hunspell )
+  library( tm )
   require( purrr )
   require( tidyverse )
 

@@ -59,17 +59,6 @@
 #'                        method = "systematic", return.data = FALSE)
 #' @export
 
-data(swissmunicipalities)
-x = swissmunicipalities
-size = 30
-prob = NULL
-wt.fn = NULL
-scheme = NULL
-sampling = "strata"
-sampling_control = list(by = 'REG', equal_size_samples = TRUE)
-method = "srswor"
-
-
 textsamp <- function(x,
                      size = NULL, prob = NULL, wt.fn = NULL, scheme = NULL,
                      sampling = NULL,
@@ -155,8 +144,6 @@ textsamp <- function(x,
   }
 }
 
-#' @rdname textsamp
-#'
 #'   Sample `size` documents from corpus x, stratifying the sample by
 #'   strata defined by unique combinations of passed stratification
 #'   variables. Say the stratification variables divide the documents
@@ -169,6 +156,7 @@ textsamp <- function(x,
 #'   Proportions will be calculated as round( size * n_k / n ), where
 #'   n is the number of documents total.
 #'
+#' @rdname textsamp
 #' @param by One of two things: either a \code{data.frame} with
 #'   document-level stratification variable(s) or a character vector
 #'   with the names of the stratification variables to be found in
@@ -243,8 +231,6 @@ textsamp_strata <- function(x, size, by = NULL, equal_size_samples = FALSE, ...)
 }
 
 
-#' @rdname textsamp
-#'
 #'   This method will attempt to sample certain number of clusters of documents
 #'   from data (simple random clustering) at first
 #'   and then sampling an equal number of documents from each selected cluster.
@@ -258,7 +244,7 @@ textsamp_strata <- function(x, size, by = NULL, equal_size_samples = FALSE, ...)
 #'   clusters as all the _unique_ combinations of these variables.
 #'   E.g., if A has values of 1, 2, 3 and B has values of 1, 2, then
 #'   there could be up to six clusters.
-#'
+#' @rdname textsamp
 #' @param by a \code{data.frame} with document-level grouping
 #'   variable(s) or character vector with names of variables in
 #'   `docvars(x)`

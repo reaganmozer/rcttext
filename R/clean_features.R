@@ -5,16 +5,39 @@
 #' Given set of generated features, simplify set of features using
 #' carat package.
 #'
-#' @param meta The set of features
+#' @param meta A matrix or dataframe containing the set of only numeric features
+#'   to be simplified.
 #' @param ignore List of column names to ignore when simplifying
 #'   (e.g., ID column and other columns that should be preserved).
 #' @param uniqueCut  Param for carat's nearZeroVar
 #' @param freqCut Param for carat's nearZeroVar
 #' @param cor Cutoff of how correlated features should be before dropping one.
-#' @param remove.lc TRUE means remove colinear combinations of features.
+#' @param remove.lc TRUE means remove collinear combinations of features.
 #' @param verbose Print out progress to console.
-#' @return Updated meta with fewer columns of the preserved features.
+#' @return Updated 'meta' in matrix form with fewer columns of
+#'   the preserved features.
+#' @examples
+#' ## Example 1
+#' # Create a 10x20 matrix with random numbers between 0 and 1
+#' random_matrix <- matrix(runif(200), nrow = 10, ncol = 20)
+#'
+#' # Create a 10x20 dataframe with random numbers between 0 and 1
+#' random_df <- data.frame(matrix(runif(200), nrow = 10, ncol = 20))
+#'
+#' # Apply the clean_features function to the matrix
+#' cleaned_matrix <- clean_features(random_matrix)
+#'
+#' # Apply the clean_features function to the dataframe and convert back to dataframe
+#' cleaned_df <- data.frame(clean_features(random_df))
+#'
+#' ## Example 2
+#' # Apply the clean_features function with a correlation cutoff (0.10)
+#' cleaned_matrix <- clean_features(random_matrix, cor = 0.10)
+#'
+#' # Apply the clean_features function to the dataframe with a correlation cutoff (0.90)
+#' cleaned_df <- data.frame(clean_features(random_df, cor = 0.50))
 #' @export
+
 clean_features <- function( meta, ignore = NULL,
                             remove.lc = TRUE,
                             uniqueCut = 1, freqCut = 99,

@@ -13,9 +13,9 @@
 #'
 #' @param x Character vector or corpus object.
 #' @param split_hyphens A logical indicating whether hypenated words should
-#' be treated as two tokens (split at the hypen).
+#'   be treated as two tokens (split at the hypen).
 #'
-#'@examples
+#' @examples
 #'
 #' ## Typo correction: given corpus x -> given corpus
 #'
@@ -49,7 +49,6 @@
 #' clean_text( txts )
 #'
 #' @export
-#'
 
 clean_text = function(x, split_hyphens=TRUE){
   require(tm)

@@ -16,7 +16,7 @@
 #' # (CSV or dataframe).
 #' # The txt_data should be a dataframe
 #' # and have the same column name(s) as "reads_liwc".
-
+#'
 #' data("reads_liwc")
 #' data("example_meta")
 #'
