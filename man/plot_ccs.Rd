@@ -4,7 +4,14 @@
 \alias{plot_ccs}
 \title{Plot the results from a CCS run}
 \usage{
-plot_ccs(out, xlim = NULL, xadj = c(-0.025, 0.025), ...)
+plot_ccs(
+  out,
+  xlim = NULL,
+  xadj = c(-0.025, 0.025),
+  xlab = "Difference in Usage Rates",
+  sub = "(Treatment - Control)",
+  ...
+)
 }
 \arguments{
 \item{out}{a \link{textreg.result()} object}

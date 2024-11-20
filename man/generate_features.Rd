@@ -16,7 +16,8 @@ generate_features(
   terms = NULL,
   preProc = list(uniqueCut = 1, freqCut = 99, cor = 0.95, remove.lc = TRUE),
   verbose = FALSE,
-  ignore = NULL
+  ignore = NULL,
+  ...
 )
 }
 \arguments{

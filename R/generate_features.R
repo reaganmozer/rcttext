@@ -52,7 +52,8 @@ generate_features <- function(x,
                               terms = NULL,
                               preProc=list(uniqueCut=1, freqCut=99, cor=0.95, remove.lc=TRUE),
                               verbose = FALSE,
-                              ignore = NULL){
+                              ignore = NULL,
+                              ...){
 
   ignore = "s_id"
   if ( !is.null(meta) ) {
@@ -93,10 +94,8 @@ generate_features <- function(x,
 
   if (lex) {
     vcat( verbose, "Calculating lexical indices" )
-    f.ld = quanteda.textstats::textstat_lexdiv(dfm.clean, measure=ld,
-                                               remove_numbers=F, remove_punct=T,
-                                               remove_symbols=F)
-    f.read = quanteda.textstats::textstat_readability(raw, measure=read, intermediate = F)
+    f.ld = quanteda.textstats::textstat_lexdiv(dfm.clean, measure=ld,...)
+    f.read = quanteda.textstats::textstat_readability(raw, measure=read,...)
     f.ent = quanteda.textstats::textstat_entropy(dfm.clean, margin="documents")
     lex.feats = cbind(f.ld[,-c(1)], f.read[,-c(1)], f.ent[,-c(1)])
     names(lex.feats) = paste0( "lex_", names(lex.feats) )
@@ -129,7 +128,7 @@ generate_features <- function(x,
     sent1= liwcalike(corp, dictionary=quanteda.dictionaries::data_dictionary_MFD)
     sent1 = dplyr::select(sent1, care.virtue:sanctity.vice)
 
-    sent2 = liwcalike(corp, dictionary=data_dictionary_LoughranMcDonald)
+    sent2 = liwcalike(corp, dictionary=quanteda.sentiment::data_dictionary_LoughranMcDonald)
     sent2 = dplyr::select(sent2, negative:`modal words strong`)
 
     sent = cbind(sent, sent1, sent2)
