@@ -34,10 +34,10 @@
 #'   \code{caret::preProcess()} for applying pre-processing
 #'   transformations across the set of text features (e.g., removing
 #'   collinear features).
-#' @param ... (optional) additional arguments passed to
-#'   \link{quanteda::tokens()} for text pre-processing.
 #' @param ignore List of column names to ignore when simplifying
 #'   (e.g., ID column and other columns that should be preserved).
+#' @param ... (optional) additional arguments passed to
+#'   \link{quanteda::tokens()} for text pre-processing.
 #' @return A data.frame of available text features, one row per document,
 #'   one column per feature.
 #' @export
