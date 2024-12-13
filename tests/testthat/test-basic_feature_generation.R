@@ -1,10 +1,16 @@
 
+library( tidyverse )
+
+if ( FALSE ) {
+  library( testthat )
+}
+
 test_that("basic feature generation works", {
   data( "toy_reads" )
 
 
   # Grab key columns of metadata
-  all.feats = select(toy_reads, ID, Q1, Q2, more)
+  all.feats = dplyr::select(toy_reads, ID, Q1, Q2, more)
 
   # Get text (and repair one piece of spelling)
   essay.text = toy_reads$text %>%
