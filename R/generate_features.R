@@ -97,7 +97,9 @@ generate_features <- function(x,
     f.ld = quanteda.textstats::textstat_lexdiv(dfm.clean, measure=ld,...)
     f.read = quanteda.textstats::textstat_readability(raw, measure=read,...)
     f.ent = quanteda.textstats::textstat_entropy(dfm.clean, margin="documents")
-    lex.feats = cbind(f.ld[,-c(1)], f.read[,-c(1)], f.ent[,-c(1)])
+    lex.feats = cbind(f.ld[,-c(1), drop=FALSE],
+                      f.read[,-c(1), drop=FALSE],
+                      f.ent[,-c(1), drop=FALSE] )
     names(lex.feats) = paste0( "lex_", names(lex.feats) )
 
     all.feats = add_features( all.feats, lex.feats )
