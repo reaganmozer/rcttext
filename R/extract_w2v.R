@@ -81,6 +81,12 @@ extract_w2v <- function(x,
     glove = model
   }
 
+  # If glove is a matrix, convert to a dataframe so we can subset columns more easily.
+  if ( !is.data.frame( glove ) ) {
+    glove = as.data.frame( glove )
+    glove$token = rownames(glove)
+  }
+
   # Subset to only those terms used in the target text
   glove.vocab = sort(unique(glove$token))
 

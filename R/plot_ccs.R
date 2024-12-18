@@ -14,7 +14,8 @@
 #' @param xadj adjustments to the lower and upper limits on the x-axis of the plot
 #' @param ... additional arguments passed to plot
 #' @export
-plot_ccs = function(out, xlim=NULL, xadj=c(-0.025,0.025),...){
+plot_ccs = function(out, xlim=NULL, xadj=c(-0.025,0.025),
+                    xlab="Difference in Usage Rates", sub="(Treatment - Control)", ...){
   out1 = out
   xlim0 = round(c(min(out1$diff.val), max(out1$diff.val)),1)
 
@@ -37,6 +38,6 @@ plot_ccs = function(out, xlim=NULL, xadj=c(-0.025,0.025),...){
   abline(v=0,lty=2)
   text(x=out1$diff.val, y=yvals, labels=out1$phrase, cex=0.75+2*out1$tot.avg)#cex=0.6+(out1$n.mods)/4)
   axis(side=1)
-  title(xlab="Difference in Usage Rates",sub="(Treatment - Control)",
+  title(xlab=xlab, sub=sub,
         cex.lab=0.95, cex=0.8)
 }
