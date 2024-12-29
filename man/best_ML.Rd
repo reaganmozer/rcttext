@@ -45,9 +45,6 @@ resampling methods and returns the best performing model based on R-squared.
 }
 \examples{
 # Load necessary libraries
-library(caret)
-library(caretEnsemble)
-library(dplyr)
 
 # Simulate example data
 set.seed(123)

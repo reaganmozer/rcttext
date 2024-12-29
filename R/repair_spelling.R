@@ -8,11 +8,12 @@
 #' with the correct spellings.
 #'
 #' @param text Character vector
-#' @param dictionary Dataframe with two columns of text, or a list of
+#' @param dictionary Either a dataframe with two columns of text, or a character vector of
 #'   words.
 #' @param to_words If dictionary is a list of words, this is list of
 #'   corresponding words.
-#' @param Character vector, revised version of text.
+#' @return Character vector as same length as text.  The revised
+#'   version of text.
 #'
 #' @examples
 #'

@@ -2,20 +2,21 @@
 
 #' Clean and simplify feature set
 #'
-#' Given set of generated features, simplify set of features using
+#' Given set of generated features, simplify set of features using the
 #' carat package.
 #'
 #' @param meta A matrix or dataframe containing the set of only numeric features
 #'   to be simplified.
 #' @param ignore List of column names to ignore when simplifying
 #'   (e.g., ID column and other columns that should be preserved).
-#' @param uniqueCut  Param for carat's nearZeroVar
-#' @param freqCut Param for carat's nearZeroVar
+#' @param uniqueCut  Param passed to carat's nearZeroVar
+#' @param freqCut Param passed to carat's nearZeroVar
 #' @param cor Cutoff of how correlated features should be before dropping one.
 #' @param remove.lc TRUE means remove collinear combinations of features.
 #' @param verbose Print out progress to console.
 #' @return Updated 'meta' in matrix form with fewer columns of
 #'   the preserved features.
+#'
 #' @examples
 #' ## Example 1
 #' # Create a 10x20 matrix with random numbers between 0 and 1
@@ -44,7 +45,7 @@ clean_features <- function( meta, ignore = NULL,
                             cor = 0.95,
                             verbose = FALSE ) {
 
-  require( caret )
+  #require( caret )
   is.mat = is.matrix(meta)
   meta_aside = NULL
 

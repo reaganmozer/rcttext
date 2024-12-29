@@ -2,8 +2,9 @@
 % Please edit documentation in R/textfx.R
 \name{textfx}
 \alias{textfx}
-\title{Given text from a randomized trial with a binary treatment, this function computes
-estimates for the average treatment effect with respect to an array of text-based outcomes}
+\title{Given text from a randomized trial with a binary treatment, this
+function computes estimates for the average treatment effect with
+respect to an array of text-based outcomes}
 \usage{
 textfx(
   x,
@@ -19,22 +20,26 @@ textfx(
 
 \item{Z}{Indicator for treatment assignment.}
 
-\item{adj}{(optional) character vector or named list of variables in the data matrix to
-adjust for when estimating treatment impacts.}
+\item{adj}{(optional) character vector or named list of variables
+in the data matrix to adjust for when estimating treatment
+impacts.}
 
-\item{data}{A \code{data.frame} of subject-level identifiers, demographic
-variables, group membership, and/or other pre-treatment covariates.}
+\item{data}{A \code{data.frame} of subject-level identifiers,
+demographic variables, group membership, and/or other
+pre-treatment covariates.}
 
-\item{wts}{Sampling weights for documents.  Assumed uniform if null.}
+\item{wts}{Sampling weights for documents.  Assumed uniform if
+null.}
 
-\item{design}{For multi-site and cluster randomized experiments, a named list of vectors containing site IDs and/or cluster IDs.}
-
-\item{mcp}{character string specifying the correction method to be applied to adjust for multiple comparisons. Defaults to no adjustments. See \link{p.adjust} for available adjustment methods.}
+\item{design}{For multi-site and cluster randomized experiments, a
+named list of vectors containing site IDs and/or cluster IDs.}
 }
 \value{
-A model object for estimating treatment impact across an array of features.
+A model object for estimating treatment impact across an
+  array of features.
 }
 \description{
-Given text from a randomized trial with a binary treatment, this function computes
-estimates for the average treatment effect with respect to an array of text-based outcomes
+Given text from a randomized trial with a binary treatment, this
+function computes estimates for the average treatment effect with
+respect to an array of text-based outcomes
 }

@@ -5,9 +5,6 @@
 #' estimates for the average treatment effect with respect to the human-coded
 #' outcome.
 #'
-#' @inheritParams get.ests
-#' @inheritParams get_ML_est
-#'
 #' @param y.obs A vector of human-coded scores (with NAs for unscored documents).
 #' @param yhat A vector of predicted scores estimated via \code{predict_scores}.
 #' @param Z Indicator for treatment assignment.

@@ -9,13 +9,15 @@ repair_spelling(text, dictionary, to_words = NULL)
 \arguments{
 \item{text}{Character vector}
 
-\item{dictionary}{Dataframe with two columns of text, or a list of
+\item{dictionary}{Either a dataframe with two columns of text, or a character vector of
 words.}
 
 \item{to_words}{If dictionary is a list of words, this is list of
 corresponding words.}
-
-\item{Character}{vector, revised version of text.}
+}
+\value{
+Character vector as same length as text.  The revised
+  version of text.
 }
 \description{
 Given text as a list of character strings, and a dictionary as a

@@ -1,6 +1,6 @@
 
 library( tidyverse )
-
+library( testthat )
 
 test_that("basic feature generation works", {
   data( "toy_reads" )

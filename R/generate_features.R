@@ -6,11 +6,8 @@
 #' array of linguistic and syntactic indices, available text analysis
 #' dictionaries, and pre-trained embedding models to all documents.
 #'
-#' @import quanteda
-#' @import quanteda.textstats
-#' @import quanteda.dictionaries
-#' @import tm
-#' @import caret
+#' @importFrom quanteda tokens
+#' @importFrom quanteda.textstats textstat_lexdiv textstat_readability textstat_entropy
 #'
 #' @param x A \link{corpus} object or character vector of text
 #'   documents.
@@ -101,6 +98,8 @@ generate_features <- function(x,
   if ( !is.null(meta) ) {
     stopifnot( is.data.frame(meta) )
     ignore = colnames(meta)
+  } else {
+    meta = data.frame( s_id=1:length(x) )
   }
 
   # utility to add on features
@@ -150,29 +149,35 @@ generate_features <- function(x,
   if (sent){
     vcat( verbose, "Calculating sentiment scores" )
 
-    require(quanteda.sentiment)
+    #require(quanteda.sentiment)
 
     # Valence scores
-    dics = list(data_dictionary_AFINN, data_dictionary_ANEW, data_dictionary_sentiws)
+    dics = list(quanteda.sentiment::data_dictionary_AFINN,
+                quanteda.sentiment::data_dictionary_ANEW,
+                quanteda.sentiment::data_dictionary_sentiws)
     names(dics)=c("AFINN","ANEW","sentiws")
-    val = do.call(cbind, lapply(dics, function(x) textstat_valence(tok.clean, dictionary=x)[,2]))
+    val = do.call(cbind, lapply(dics, function(x) {
+      quanteda.sentiment::textstat_valence(tok.clean, dictionary=x)[,2] }
+      ) )
 
-    polarity(data_dictionary_LSD2015) <- list(
+    LSD_dict <- quanteda::data_dictionary_LSD2015
+    quanteda.sentiment::polarity(LSD_dict) <- list(
       pos = c("positive", "neg_negative"),
       neg = c("negative", "neg_positive")
     )
-    dics2 = list(data_dictionary_LSD2015, data_dictionary_NRC, data_dictionary_LoughranMcDonald)
-    pol = do.call(cbind, lapply(dics2, function(x) textstat_polarity(tok.clean, dictionary=x)[,2]))
-    names(pol)=c("LSD2015","NRC","LoughranMcDonald")
+    dics2 = list(LSD_dict, quanteda.sentiment::data_dictionary_NRC,
+                 quanteda.sentiment::data_dictionary_LoughranMcDonald)
+    pol = do.call(cbind, lapply(dics2, function(x) quanteda.sentiment::textstat_polarity(tok.clean, dictionary=x)[,2]))
+    colnames(pol)=c("LSD2015","NRC","LoughranMcDonald")
 
     corp = quanteda::corpus(raw)
-    sent= liwcalike(corp, dictionary = quanteda.dictionaries::data_dictionary_RID)
+    sent = quanteda.dictionaries::liwcalike(corp, dictionary = quanteda.dictionaries::data_dictionary_RID)
     sent = sent %>% dplyr::select(WPS:OtherP)
 
-    sent1= liwcalike(corp, dictionary=quanteda.dictionaries::data_dictionary_MFD)
+    sent1 = quanteda.dictionaries::liwcalike(corp, dictionary=quanteda.dictionaries::data_dictionary_MFD)
     sent1 = dplyr::select(sent1, care.virtue:sanctity.vice)
 
-    sent2 = liwcalike(corp, dictionary=quanteda.sentiment::data_dictionary_LoughranMcDonald)
+    sent2 = quanteda.dictionaries::liwcalike(corp, dictionary=quanteda.sentiment::data_dictionary_LoughranMcDonald)
     sent2 = dplyr::select(sent2, negative:`modal words strong`)
 
     sent = cbind(sent, sent1, sent2)

@@ -2,7 +2,8 @@
 % Please edit documentation in R/textfx.R
 \name{textfx_terms}
 \alias{textfx_terms}
-\title{Estimates the average treatment effect on the frequency and prevalence of a list of specified terms and phrases}
+\title{Estimates the average treatment effect on the frequency and
+prevalence of a list of specified terms and phrases.}
 \usage{
 textfx_terms(x, Z, terms, ...)
 }
@@ -16,8 +17,11 @@ textfx_terms(x, Z, terms, ...)
 \item{...}{optional parameters passed to \link{quanteda::tokens()}}
 }
 \value{
-A vector showing the frequency and prevalence of the specified terms within each treatment group and results of the hypothesis test comparing prevalence across groups.
+A vector showing the frequency and prevalence of the
+  specified terms within each treatment group and results of the
+  hypothesis test comparing prevalence across groups.
 }
 \description{
-Estimates the average treatment effect on the frequency and prevalence of a list of specified terms and phrases
+Estimates the average treatment effect on the frequency and
+prevalence of a list of specified terms and phrases.
 }

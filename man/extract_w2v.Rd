@@ -46,6 +46,7 @@ all.feats = extract_w2v( clean_text( text$text ),
 
 }
 \references{
-{ \insertRef{mikolov2013efficient}{rcttext}
-\insertRef{pennington2014glove}{rcttext} }
+references
+\insertRef{mikolov2013efficient}{rcttext}
+\insertRef{pennington2014glove}{rcttext}
 }

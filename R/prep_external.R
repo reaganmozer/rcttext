@@ -31,11 +31,11 @@
 prep_external = function(x, dir, docnames=NULL, preProc=NULL){
 
 
-  library(tm)
-  library(fs)
-  library(progress)
+  #library(tm)
+  #library(fs)
 
-  pb = progress::progress_bar$new(format="writing text files [:bar] :percent",clear=FALSE, total=length(x),width=60)
+  pb = progress::progress_bar$new( format="writing text files [:bar] :percent",
+                                   clear=FALSE, total=length(x),width=60)
   fs::dir_create(dir)
 
   if (is.null(docnames)){docnames=1:length(x)}

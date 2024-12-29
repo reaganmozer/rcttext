@@ -23,9 +23,9 @@ to be simplified.}
 
 \item{remove.lc}{TRUE means remove collinear combinations of features.}
 
-\item{uniqueCut}{Param for carat's nearZeroVar}
+\item{uniqueCut}{Param passed to carat's nearZeroVar}
 
-\item{freqCut}{Param for carat's nearZeroVar}
+\item{freqCut}{Param passed to carat's nearZeroVar}
 
 \item{cor}{Cutoff of how correlated features should be before dropping one.}
 
@@ -36,7 +36,7 @@ Updated 'meta' in matrix form with fewer columns of
   the preserved features.
 }
 \description{
-Given set of generated features, simplify set of features using
+Given set of generated features, simplify set of features using the
 carat package.
 }
 \examples{

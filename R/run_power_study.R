@@ -18,4 +18,6 @@ run_power_study = function(n.coded=NULL, n.auto=NULL,
                            power=0.8, sig.level=0.05){
 
 
+  warning( "This method not yet implemented" )
+
 }

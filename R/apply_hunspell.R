@@ -71,18 +71,13 @@ apply_hunspell <- function( text,
                             to_lower = FALSE,
                             verbose = FALSE ) {
 
-  library( quanteda )
-  library( hunspell )
-  library( tm )
-  require( purrr )
-  require( tidyverse )
 
   hunspell::dictionary("en_US",
                        add_words = additional_words)
 
   dfm = text %>%
-    tokens() %>%
-    dfm()
+    quanteda::tokens() %>%
+    quanteda::dfm()
 
   vocab = colnames( dfm )
 
@@ -103,13 +98,13 @@ apply_hunspell <- function( text,
   mis = mis[nchar(mis)>3]
 
   # Now look at text, count number of types of mispelled words
-  csums <- tibble( word = colnames(dfm),
-                   count = colSums(dfm) )
+  csums <- dplyr::tibble( word = colnames(dfm),
+                   count = colSums(as.matrix(dfm) ) )
 
-  subs = tibble( word = mis )
-  subs = left_join( subs, csums, by="word" )
+  subs = dplyr::tibble( word = mis )
+  subs = dplyr::left_join( subs, csums, by="word" )
 
-  subs = filter( subs, count > threshold )
+  subs = dplyr::filter( subs, count > threshold )
   subs
   if (nrow(subs) == 0 ) {
     return( text )
@@ -118,7 +113,7 @@ apply_hunspell <- function( text,
   spellcorrect = function(x){
     hunspell::hunspell_suggest(x)[[1]][1]
   }
-  subs$h = map_chr(subs$word, spellcorrect)
+  subs$h = purrr::map_chr(subs$word, spellcorrect)
 
   subs=dplyr::filter(subs, !is.na(h) )
 

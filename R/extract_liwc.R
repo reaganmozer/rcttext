@@ -31,7 +31,7 @@
 #'
 #' @export
 
-extract_liwc <- function(file, meta=NULL, ID.liwc=1, ID.meta = NULL, clean=TRUE) {
+extract_liwc <- function( file, meta=NULL, ID.liwc=1, ID.meta = NULL, clean=TRUE) {
 
   liwc=read.csv(file,header=TRUE)
 
@@ -75,7 +75,7 @@ extract_liwc <- function(file, meta=NULL, ID.liwc=1, ID.meta = NULL, clean=TRUE)
 
   if (clean){ # I think this works, but it's currently breaking because of
               # the IDs not matching the LIWC file
-    out2=dplyr::select(out, -all_of( ID.liwc, ID.meta) )
+    out2=dplyr::select(out, -all_of( c( "ID.liwc", "ID.meta") ) )
     lc = caret::findLinearCombos(out2)
     if (!is.null(lc$remove)){
       drops = colnames(out2)[ lc$remove ]

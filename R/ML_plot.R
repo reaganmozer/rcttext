@@ -110,13 +110,13 @@ ML_plot = function (data = NULL,
                     fig_title = NULL,
                     legend_title = "",
                     legend.position = "bottom" ) {
-  library(ggplot2)
-  ggplot(data, aes(x = .data[[x]], y = .data[[y]], color = .data[[color]], group = .data[[group]])) +
-    geom_line() +
-    geom_point() +
-    ylim(ylim_min, ylim_max) +
-    labs(x = x_lable, y = y_lable, title = fig_title) +
-    theme_minimal() +
-    theme(legend.position = legend.position, panel.grid.major = element_blank()) +
-    guides(color = guide_legend(title = legend_title))
+
+  ggplot2::ggplot(data, aes(x = .data[[x]], y = .data[[y]], color = .data[[color]], group = .data[[group]])) +
+    ggplot2::geom_line() +
+    ggplot2::geom_point() +
+    ggplot2::ylim(ylim_min, ylim_max) +
+    ggplot2::labs(x = x_lable, y = y_lable, title = fig_title) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(legend.position = legend.position, panel.grid.major = ggplot2::element_blank()) +
+    ggplot2::guides(color = ggplot2::guide_legend(title = legend_title))
 }

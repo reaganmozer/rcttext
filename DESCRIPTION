@@ -17,7 +17,8 @@ Imports:
     quanteda.textstats,
     plotrix,
     randomizr,
-    stringi
+    stringi,
+    Rdpack
 RdMacros: Rdpack
 RoxygenNote: 7.3.2
 Depends: 

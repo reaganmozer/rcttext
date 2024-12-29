@@ -29,9 +29,6 @@
 #'
 #' @examples
 #' # Load necessary libraries
-#' library(caret)
-#' library(caretEnsemble)
-#' library(dplyr)
 #'
 #' # Simulate example data
 #' set.seed(123)
@@ -58,9 +55,6 @@ best_ML <- function( features, outcome, num = 3, por = 0.8,
                                  "adaptive_cv", "adaptive_boot",
                                  "adaptive_LGOCV" ),
                      mlList = c( "rf", "xgbTree" )) {
-  library( caret )
-  library( caretEnsemble )
-  library( dplyr )
 
   # Match the specified method with available options
   method <- match.arg( method, choices = c( "cv","boot", "boot632",
@@ -98,17 +92,17 @@ best_ML <- function( features, outcome, num = 3, por = 0.8,
   list_of_results <- lapply( mlList, function(x) {models[[x]]$resample} )
 
   # Convert results to data frame
-  df_results <- bind_rows( list_of_results )
+  df_results <- dplyr::bind_rows( list_of_results )
 
   # Add model names to results
   df_results <- df_results %>%
-    mutate( Model = lapply( mlList, function(x) {rep(x, num)}) %>% unlist() )
+    dplyr::mutate( Model = lapply( mlList, function(x) {rep(x, num)}) %>% unlist() )
 
   # Remove 'Resample' column
-  ML_Results <- df_results %>% select( -Resample )
+  ML_Results <- df_results %>% dplyr::select( -Resample )
 
   # Calculate average performance for each model
-  average_performances <- aggregate( . ~ Model, data = ML_Results, mean )
+  average_performances <- caretEnsemble::aggregate( . ~ Model, data = ML_Results, mean )
 
   # Identify the best model based on R-squared
   best_model <- average_performances[which.max(average_performances$Rsquared), "Model"]

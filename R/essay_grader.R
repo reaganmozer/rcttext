@@ -11,7 +11,7 @@
 #'
 #' @return A data frame with generated responses or graded results for each input text.
 #'
-#' @import progress
+#' @importFrom progress progress_bar
 #' @export
 #'
 #' @examples
@@ -72,7 +72,6 @@ essay_grader <- function(text, prompt, model) {
 #'
 #' @return A string containing the generated response from the ChatGPT model.
 #'
-#' @import httr
 #' @import stringr
 #' @export
 #'
