@@ -3,7 +3,7 @@
 #' This function provides a visualization of the set of textual features
 #' found to differ systematically between treatment and control groups.
 #'
-#' @import plotrix
+#' @importFrom plotrix plotCI
 #' @import scales
 #' @import dplyr
 #'

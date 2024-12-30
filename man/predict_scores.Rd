@@ -4,21 +4,27 @@
 \alias{predict_scores}
 \title{Extract predictions from a fitted text scoring model.}
 \usage{
-predict_scores(fit, newdata, na.action = na.omit, ...)
+predict_scores(fit, X, Z)
 }
 \arguments{
-\item{fit}{a model or list of models to use for prediction}
+\item{fit}{A list containing fitted models for two groups (typically treatment and control). The list should include `mod0` for group 0 and `mod1` for group 1, along with a binary vector `coded` indicating which documents are part of the coded subset.}
 
-\item{newdata}{an optional data frame or matrix of predictors}
+\item{X}{A data frame or matrix of predictor variables used for making predictions.}
 
-\item{na.action}{the method for handling missing data}
-
-\item{...}{additional arguments to pass to \code{predict.train}}
+\item{Z}{A binary vector indicating group membership (e.g., 0 for control, 1 for treatment).}
 }
 \value{
-A vector of predictions
+A numeric vector of predicted scores for all documents.
 }
 \description{
-This function computes the predicted scores for a collection of documents based on the
-results of a trained ensemble learner.
+This function calculates predicted scores for all documents based on fitted models. It handles both in-sample and out-of-sample predictions for different groups.
+}
+\examples{
+# Example usage with hypothetical data
+fit <- list(mod0 = lm(Y ~ X1 + X2, data = data0), mod1 = lm(Y ~ X1 + X2, data = data1), coded = c(1, 0, 1, 0, 1))
+X <- data.frame(X1 = rnorm(100), X2 = rnorm(100))
+Z <- sample(c(0, 1), 100, replace = TRUE)
+yhat <- predict_scores(fit, X, Z)
+print(yhat)
+
 }

@@ -1,5 +1,5 @@
 ---
-title: "intro_to_package"
+title: "Introduction to the `rcttext` package"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{intro_to_package}
@@ -12,8 +12,61 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+library(tidyverse)
+knitr::opts_chunk$set(echo = TRUE,
+          fig.width = 5,
+          fig.height = 3,
+          out.width = "75%",
+           message = FALSE,
+          fig.align = "center")
+options(list(dplyr.summarise.inform = FALSE))
+theme_set( theme_classic() )
+
 ```
 
-```{r setup}
-library(tada)
+In this vignette, we will introduce the `rcttext` package, which provides a set of functions for working with text data in R, when that text is an outcome in a randomized controlled trial. The package includes functions for cleaning and preprocessing text data, as well as for applying text mining techniques such as sentiment analysis and topic modeling.
+
+
+As this package is under active development, we recommend installing the development version from GitHub using the `devtools` package:
+
+```{r install, eval=FALSE}
+devtools::install_github("https://github.com/reaganmozer/rcttext/")
 ```
+
+Once installed, you can load the package using the following command:
+
+```{r setup, message=FALSE}
+library(rcttext)
+```
+
+## Overview of the package
+
+We provide a small fake dataset to demonstrate the package's capabilities. The dataset contains a column of text data, `text`, and a column of treatment indicators, `more`. The `text` column contains text data that we will use to demonstrate the package's functions.  The Q1 and Q2 are human-coded evaluations (grades) for the text.
+
+```{r}
+data( "toy_reads" )
+names( toy_reads )
+table( toy_reads$more )
+table( toy_reads$Q1 )
+```
+
+
+
+## The pipeline
+
+For a given corpus with two subgroups
+
+ * Generate features (`generate_features()`)
+ * Run impact analysis on the set of features. (Need to move script 4 from reads replication into package.)  Make plots ()
+ * Run CCS to compare the two groups (and make plots and tables of the selected phrases).
+ 
+If you have human coding, then you can use our package to enhance precision
+
+ * Fit machine learner to predict given outcome
+ * Fit the model and calculate the model assisted impact estimate (`get_ests()`)
+ 
+ 
+ 
+## Text preprocessing
+
+

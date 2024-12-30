@@ -6,8 +6,6 @@
 #' This function provides a visualization of the set of words and phrases
 #' found to differ systematically between treatment and control groups
 #'
-#' @import plotrix
-#' @import scales
 #'
 #' @param out a \link{textreg.result()} object
 #' @param xlim limits for x-axis

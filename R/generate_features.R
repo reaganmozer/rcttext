@@ -6,11 +6,8 @@
 #' array of linguistic and syntactic indices, available text analysis
 #' dictionaries, and pre-trained embedding models to all documents.
 #'
-#' @import quanteda
-#' @import quanteda.textstats
-#' @import quanteda.dictionaries
-#' @import tm
-#' @import caret
+#' @importFrom quanteda tokens
+#' @importFrom quanteda.textstats textstat_lexdiv textstat_readability textstat_entropy
 #'
 #' @param x A \link{corpus} object or character vector of text
 #'   documents.
@@ -21,7 +18,7 @@
 #' @param sent Logical, indicating whether to compute sentiment
 #'   analysis features from available dictionaries
 #' @param clean_features TRUE means implement cleaning step where we
-#'   drop features with no variation and colinear features. (This
+#'   drop features with no variation and collinear features. (This
 #'   happens before any term generation features are added.)
 #' @param ld character vector defining lexical diversity measures to
 #'   compute; see \link{quanteda.textstats::textstat_lexdiv()}
@@ -40,6 +37,48 @@
 #'   \link{quanteda::tokens()} for text pre-processing.
 #' @return A data.frame of available text features, one row per document,
 #'   one column per feature.
+#'
+#' @examples
+#'
+#' # Note: This function does not work with the dataframe with 1 object.
+#' # The 'meta' argument requires a dataframe with at least two rows
+#'
+#' ## Example 1: Basic Feature Generation
+#'
+#' # Create a small dataframe with 2 texts (objects).
+#' df = data.frame(
+#'  text = c( "This function generates an array of text features",
+#'            "This function generates a rich feature representation as a character
+#'             vector or quanteda::corpus() object by applying an array of linguistic
+#'             and syntactic indices" ))
+#'
+#' # Generated text features without simplifying the set of features
+#' feats1 = generate_features( df$text,
+#'                             meta = df,
+#'                             clean_features = FALSE )
+#'
+#'
+#' ## Example 2: Feature Generation with Example Data and Customization
+#'
+#' # Load example dataframe with multiple texts
+#' data( "toy_reads" )
+#'
+#' # Generate text features without simplifying the set of features
+#' feats2 = generate_features( toy_reads$text,
+#'                             meta=toy_reads,
+#'                             clean_features = FALSE,
+#'                             ignore = "ID" )
+#'
+#' # Generate preliminary text features,
+#' # simplifying the set of features and specifying sent, read, ld
+#' feats3 = generate_features( toy_reads$text, meta=toy_reads,
+#'                             sent = TRUE,
+#'                             clean_features = TRUE,
+#'                             read = c("Flesch","Flesch.Kincaid", "ARI"),
+#'                             ld=c("TTR","R","K"),
+#'                             ignore=c("ID"),
+#'                             verbose = TRUE )
+#'
 #' @export
 
 generate_features <- function(x,
@@ -59,6 +98,8 @@ generate_features <- function(x,
   if ( !is.null(meta) ) {
     stopifnot( is.data.frame(meta) )
     ignore = colnames(meta)
+  } else {
+    meta = data.frame( s_id=1:length(x) )
   }
 
   # utility to add on features
@@ -108,29 +149,35 @@ generate_features <- function(x,
   if (sent){
     vcat( verbose, "Calculating sentiment scores" )
 
-    require(quanteda.sentiment)
+    #require(quanteda.sentiment)
 
     # Valence scores
-    dics = list(data_dictionary_AFINN, data_dictionary_ANEW, data_dictionary_sentiws)
+    dics = list(quanteda.sentiment::data_dictionary_AFINN,
+                quanteda.sentiment::data_dictionary_ANEW,
+                quanteda.sentiment::data_dictionary_sentiws)
     names(dics)=c("AFINN","ANEW","sentiws")
-    val = do.call(cbind, lapply(dics, function(x) textstat_valence(tok.clean, dictionary=x)[,2]))
+    val = do.call(cbind, lapply(dics, function(x) {
+      quanteda.sentiment::textstat_valence(tok.clean, dictionary=x)[,2] }
+      ) )
 
-    polarity(data_dictionary_LSD2015) <- list(
+    LSD_dict <- quanteda::data_dictionary_LSD2015
+    quanteda.sentiment::polarity(LSD_dict) <- list(
       pos = c("positive", "neg_negative"),
       neg = c("negative", "neg_positive")
     )
-    dics2 = list(data_dictionary_LSD2015, data_dictionary_NRC, data_dictionary_LoughranMcDonald)
-    pol = do.call(cbind, lapply(dics2, function(x) textstat_polarity(tok.clean, dictionary=x)[,2]))
-    names(pol)=c("LSD2015","NRC","LoughranMcDonald")
+    dics2 = list(LSD_dict, quanteda.sentiment::data_dictionary_NRC,
+                 quanteda.sentiment::data_dictionary_LoughranMcDonald)
+    pol = do.call(cbind, lapply(dics2, function(x) quanteda.sentiment::textstat_polarity(tok.clean, dictionary=x)[,2]))
+    colnames(pol)=c("LSD2015","NRC","LoughranMcDonald")
 
     corp = quanteda::corpus(raw)
-    sent= liwcalike(corp, dictionary = quanteda.dictionaries::data_dictionary_RID)
+    sent = quanteda.dictionaries::liwcalike(corp, dictionary = quanteda.dictionaries::data_dictionary_RID)
     sent = sent %>% dplyr::select(WPS:OtherP)
 
-    sent1= liwcalike(corp, dictionary=quanteda.dictionaries::data_dictionary_MFD)
+    sent1 = quanteda.dictionaries::liwcalike(corp, dictionary=quanteda.dictionaries::data_dictionary_MFD)
     sent1 = dplyr::select(sent1, care.virtue:sanctity.vice)
 
-    sent2 = liwcalike(corp, dictionary=quanteda.sentiment::data_dictionary_LoughranMcDonald)
+    sent2 = quanteda.dictionaries::liwcalike(corp, dictionary=quanteda.sentiment::data_dictionary_LoughranMcDonald)
     sent2 = dplyr::select(sent2, negative:`modal words strong`)
 
     sent = cbind(sent, sent1, sent2)

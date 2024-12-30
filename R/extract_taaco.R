@@ -27,7 +27,25 @@
 #' @param drop_sent Drop adjacent overlap  between sentences
 #'   (TRUE/FALSE).
 #' @return Returns a \code{data.frame} of text features.
+#'
+#' @examples
+#' # This function extracts features from a TAACO-generated data
+#' # (CSV or dataframe).
+#' # The txt_data should be a dataframe
+#' # and have the same column name(s) as "reads_tacco"
+#'
+#' data("reads_taaco")
+#' data("example_meta")
+#'
+#' reads_tacco = reads_taaco
+#' txt_data = meta
+#'
+#' all.feats = extract_taaco( "reads_taaco",
+#'                             meta = txt_data,
+#'                             ID.meta = "ID" )
+#'
 #' @export
+
 extract_taaco <- function(file, meta=NULL, ID.meta=NULL,
                           drop_para = FALSE, drop_sent = TRUE ) {
 

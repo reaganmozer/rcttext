@@ -30,7 +30,23 @@ string using a set of pre-trained word vectors such as GloVe
 \insertCite{pennington2014glove}{rcttext} and returns the mean vector
 projection across all words in a document.
 }
+\examples{
+
+# The txt_data should be a dataframe
+
+library(textdata)
+data("example_meta")
+
+txt_data = meta
+glove.50d = embedding_glove6b(dimensions = 50)
+
+all.feats = extract_w2v( clean_text( text$text ),
+                         meta = txt_data,
+                         model = glove.50d )
+
+}
 \references{
-{ \insertRef{mikolov2013efficient}{rcttext}
-\insertRef{pennington2014glove}{rcttext} }
+references
+\insertRef{mikolov2013efficient}{rcttext}
+\insertRef{pennington2014glove}{rcttext}
 }

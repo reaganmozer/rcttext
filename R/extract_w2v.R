@@ -16,12 +16,12 @@
 #' \insertCite{pennington2014glove}{rcttext} and returns the mean vector
 #' projection across all words in a document.
 #'
-#' @import quanteda
-#' @import dplyr
+#' @importFrom quanteda tokens
+#' @importFrom dplyr select all_of
 #'
 #' @inheritParams generate_features
 #'
-
+#'
 #' @param model User-specified model object pointing to a custom
 #'   pre-trained embedding model, represented as a matrix or data frame where the
 #'   first column is the word/token and the following columns are numeric vectors.  If
@@ -30,8 +30,24 @@
 #' @return A list of data frames containing the Word2Vec projections
 #'   of the corpus
 #'
-#' @references{ \insertRef{mikolov2013efficient}{rcttext}
-#' \insertRef{pennington2014glove}{rcttext} }
+#' @references references
+#' \insertRef{mikolov2013efficient}{rcttext}
+#' \insertRef{pennington2014glove}{rcttext}
+#'
+#' @examples
+#'
+#' # The txt_data should be a dataframe
+#'
+#' library(textdata)
+#' data("example_meta")
+#'
+#' txt_data = meta
+#' glove.50d = embedding_glove6b(dimensions = 50)
+#'
+#' all.feats = extract_w2v( clean_text( text$text ),
+#'                          meta = txt_data,
+#'                          model = glove.50d )
+#'
 #' @export
 extract_w2v <- function(x,
                         meta = NULL,
@@ -80,12 +96,16 @@ extract_w2v <- function(x,
 
   terms.keep = intersect(glove.vocab, txt.vocab)
 
-  glove.sub = glove %>% filter(token %in% terms.keep) %>% arrange(token)
-  dfm.sub = convert(quanteda::dfm_keep(dfm, terms.keep), to="data.frame") %>% select(all_of(terms.keep))
+  glove.sub = glove %>%
+    filter(token %in% terms.keep) %>%
+    arrange(token)
+  dfm.sub = quanteda::convert(quanteda::dfm_keep(dfm, terms.keep), to="data.frame") %>%
+    select(all_of(terms.keep))
 
   stopifnot(all.equal(glove.sub$token, names(dfm.sub))) # check that all the tokens are in the same order
 
-  proj = as.matrix(dfm.sub) %*% (glove.sub %>% select(-token) %>% as.matrix())
+  proj = as.matrix(dfm.sub) %*% (glove.sub %>% select(-token) %>%
+                                   as.matrix())
   proj = as.data.frame(proj / rowSums(dfm.sub))
 
 
