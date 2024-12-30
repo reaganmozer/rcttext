@@ -7,7 +7,7 @@
 generate_distance_features(
   x,
   meta = NULL,
-  reference_docs = NULL,
+  reference_docs,
   verbose = FALSE,
   method = c("cosine", "w2v"),
   model = NULL,

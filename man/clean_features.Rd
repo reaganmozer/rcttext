@@ -15,25 +15,28 @@ clean_features(
 )
 }
 \arguments{
-\item{meta}{A matrix or dataframe containing the set of only numeric features
-to be simplified.}
+\item{meta}{A matrix or dataframe containing the set of only
+numeric features to be simplified.}
 
 \item{ignore}{List of column names to ignore when simplifying
-(e.g., ID column and other columns that should be preserved).}
+(e.g., ID column and other columns such as special features that
+should be preserved).}
 
-\item{remove.lc}{TRUE means remove collinear combinations of features.}
+\item{remove.lc}{TRUE means remove collinear combinations of
+features.}
 
 \item{uniqueCut}{Param passed to carat's nearZeroVar}
 
 \item{freqCut}{Param passed to carat's nearZeroVar}
 
-\item{cor}{Cutoff of how correlated features should be before dropping one.}
+\item{cor}{Cutoff of how correlated features should be before
+dropping one.}
 
 \item{verbose}{Print out progress to console.}
 }
 \value{
-Updated 'meta' in matrix form with fewer columns of
-  the preserved features.
+Updated 'meta' in matrix form with fewer columns of the
+  preserved features.
 }
 \description{
 Given set of generated features, simplify set of features using the

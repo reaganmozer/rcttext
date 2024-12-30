@@ -5,17 +5,21 @@
 #' Given set of generated features, simplify set of features using the
 #' carat package.
 #'
-#' @param meta A matrix or dataframe containing the set of only numeric features
-#'   to be simplified.
+#' @param meta A matrix or dataframe containing the set of only
+#'   numeric features to be simplified.
 #' @param ignore List of column names to ignore when simplifying
-#'   (e.g., ID column and other columns that should be preserved).
+#'   (e.g., ID column and other columns such as special features that
+#'   should be preserved).
 #' @param uniqueCut  Param passed to carat's nearZeroVar
 #' @param freqCut Param passed to carat's nearZeroVar
-#' @param cor Cutoff of how correlated features should be before dropping one.
-#' @param remove.lc TRUE means remove collinear combinations of features.
+#' @param cor Cutoff of how correlated features should be before
+#'   dropping one.
+#' @param remove.lc TRUE means remove collinear combinations of
+#'   features.
 #' @param verbose Print out progress to console.
-#' @return Updated 'meta' in matrix form with fewer columns of
-#'   the preserved features.
+#'
+#' @return Updated 'meta' in matrix form with fewer columns of the
+#'   preserved features.
 #'
 #' @examples
 #' ## Example 1

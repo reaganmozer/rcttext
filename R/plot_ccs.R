@@ -3,20 +3,22 @@
 
 #' Plot the results from a CCS run
 #'
-#' This function provides a visualization of the set of words and phrases
-#' found to differ systematically between treatment and control groups
+#' This function provides a visualization of the set of words and
+#' phrases found to differ systematically between treatment and
+#' control groups
 #'
 #'
 #' @param out a \link{textreg.result()} object
 #' @param xlim limits for x-axis
-#' @param xadj adjustments to the lower and upper limits on the x-axis of the plot
+#' @param xadj adjustments to the lower and upper limits on the x-axis
+#'   of the plot
 #' @param ... additional arguments passed to plot
 #' @export
 plot_ccs = function(out, xlim=NULL, xadj=c(-0.025,0.025),
-                    xlab="Difference in Usage Rates", sub="(Treatment - Control)", ...){
+                    xlab="Difference in Usage Rates",
+                    sub="(Treatment - Control)", ...){
   out1 = out
   xlim0 = round(c(min(out1$diff.val), max(out1$diff.val)),1)
-
 
   if (is.null(xlim)){
     xlim = xlim0

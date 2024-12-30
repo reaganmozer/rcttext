@@ -4,22 +4,25 @@
 \alias{plot_textfx}
 \title{Plot the results from an impact analysis with text outcomes}
 \usage{
-plot_textfx(out, alpha = 0.05, cols = F, group = T, xlim = NULL, ...)
+plot_textfx(out, alpha = 0.05, cols = FALSE, group = TRUE, xlim = NULL, ...)
 }
 \arguments{
 \item{out}{a model object output from \code{estimate_impacts()}}
 
 \item{alpha}{the threshold for determining statistical significance}
 
-\item{cols}{should effects be colored by direction (red for negative impacts, blue for positive impacts)}
+\item{cols}{should effects be colored by direction (red for
+negative impacts, blue for positive impacts)}
 
-\item{group}{(optional) should effects be grouped by category (e.g., higher-level summary measures, linguistic features, etc.)}
+\item{group}{(optional) should effects be grouped by category
+(e.g., higher-level summary measures, linguistic features, etc.)}
 
 \item{xlim}{(optional) bounds for x-axis}
 
 \item{...}{additional arguments passed to plot}
 }
 \description{
-This function provides a visualization of the set of textual features
-found to differ systematically between treatment and control groups.
+This function provides a visualization of the set of textual
+features found to differ systematically between treatment and
+control groups.
 }

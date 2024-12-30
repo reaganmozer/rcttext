@@ -1,3 +1,6 @@
+
+library( testthat )
+
 test_that("pairwise distance calculations work", {
 
   data( "toy_reads" )
@@ -20,10 +23,11 @@ test_that("pairwise distance calculations work", {
   expect_equal( d$doc_3[10], 0 )
 
   names( rr ) = c( "A", "Bob", "Cat" )
-  d = generate_distance_features( toy_reads$text,
+  d = generate_distance_features( clean_text( toy_reads$text ),
                                   meta=toy_reads[ , c("ID","Q1","Q2","more") ],
                                   rr, method = "w2v" )
   d
   head( d )
   expect_true( all( c( "doc_A", "doc_Bob", "doc_Cat" ) %in% colnames( d ) ) )
+
 })

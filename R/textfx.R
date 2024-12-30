@@ -64,6 +64,12 @@ impacts_on_features <- function( data,
     } else {
       stopifnot( is.data.frame(meta) )
       stopifnot( nrow( meta ) == nrow(meta2) )
+      com_names = intersect( colnames(meta), colnames(meta2) )
+      if ( length( com_names ) > 0 ) {
+        # drop those columns in meta2
+        meta2 <- meta2 %>%
+          dplyr::select( -any_of( com_names ) )
+      }
       meta = bind_cols( meta, meta2 )
     }
   } else {
@@ -79,17 +85,8 @@ impacts_on_features <- function( data,
 
   # Effect size conversion
   if ( standardize != FALSE ) {
-    if ( standardize == "pool" ) {
-      res$scale = sqrt( (res$Grp_1_sd^2 + res$Grp_0_sd^2) / 2 )
-    } else {
-      res$scale = res$Grp_0_sd
-    }
-
-    res <- res %>%
-      mutate(across(any_of(c("estimate", "std.error", "conf.low", "conf.high")),
-                    ~ .x / scale, .names = "{.col}_std"))
+    res <- standardize_impact_table( res, standardize )
   }
-
 
   # Multiple testing correction
   if ( is.null( planned_features ) ) {
@@ -107,7 +104,25 @@ impacts_on_features <- function( data,
   return(res)
 }
 
+standardize_impact_table <- function( res, standardize = TRUE ) {
 
+  # If already standardized, bail
+  if ( "estimate_std" %in% colnames(res) ) {
+    return(res)
+  }
+
+  if ( standardize == "pool" ) {
+    res$scale = sqrt( (res$Grp_1_sd^2 + res$Grp_0_sd^2) / 2 )
+  } else {
+    res$scale = res$Grp_0_sd
+  }
+
+  res <- res %>%
+    mutate(across(any_of(c("estimate", "std.error", "conf.low", "conf.high")),
+                  ~ .x / scale, .names = "{.col}_std"))
+
+  res
+}
 
 
 #' Default analysis_function for impacts_on_features

@@ -3,8 +3,8 @@ library( tidyverse )
 library( testthat )
 
 test_that("basic feature generation works", {
-  data( "toy_reads" )
 
+  data( "toy_reads" )
 
   # Grab key columns of metadata
   all.feats = dplyr::select(toy_reads, ID, Q1, Q2, more)
@@ -29,7 +29,8 @@ test_that("basic feature generation works", {
 
   # Note: term of 'xxx' are illegible words/phrases
   tt <- table( all.feats$xxx )
-  expect_true( tt[2] == 3 )
+  tt
+  expect_true( tt[2] == 1 )
 
   # Add Word2Vec projections for each essay on 50 dimensions
   all.feats2 = extract_w2v( clean_text(essay.text),

@@ -7,6 +7,7 @@ intervention on feature represented by that column.}
 \usage{
 impacts_on_features(
   data,
+  meta = NULL,
   ignore = NULL,
   analysis_function = simple_RCT_analysis,
   mcp = "fdr",
@@ -20,6 +21,10 @@ impacts_on_features(
 \item{data}{Dataframe of the meta information and features.  Will
 calculate impacts on all columns of data that are not specified
 by ignore.}
+
+\item{meta}{Extra information that are not text features to be
+analyzed (e.g. treatment assignment indicator) that should be
+given to each analysis for each feature (this is a dataframe)}
 
 \item{ignore}{Character vector of column names to ignore in the
 analysis.  Or list of column indices.}

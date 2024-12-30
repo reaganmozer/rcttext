@@ -18,11 +18,13 @@ plot_ccs(
 
 \item{xlim}{limits for x-axis}
 
-\item{xadj}{adjustments to the lower and upper limits on the x-axis of the plot}
+\item{xadj}{adjustments to the lower and upper limits on the x-axis
+of the plot}
 
 \item{...}{additional arguments passed to plot}
 }
 \description{
-This function provides a visualization of the set of words and phrases
-found to differ systematically between treatment and control groups
+This function provides a visualization of the set of words and
+phrases found to differ systematically between treatment and
+control groups
 }
