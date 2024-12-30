@@ -17,31 +17,34 @@ best_ML(
 \arguments{
 \item{features}{A data frame of feature variables.}
 
-\item{outcome}{A vector or data frame containing the outcome variable.}
+\item{outcome}{A vector or data frame containing the outcome
+variable.}
 
-\item{num}{Either the number of folds (for cross-validation) or
-the number of resampling iterations.}
+\item{num}{Either the number of folds (for cross-validation) or the
+number of resampling iterations.}
 
-\item{por}{The proportion of data to be used for training,
-with the remainder used for testing (default is 0.8).}
+\item{por}{The proportion of data to be used for training, with the
+remainder used for testing (default is 0.8).}
 
-\item{method}{The resampling method to be used. Options include "boot",
-"boot632", "optimism_boot", "boot_all", "cv", "repeatedcv", "LOOCV",
-"LGOCV", "none", "oob", "adaptive_cv", "adaptive_boot", and "adaptive_LGOCV".
-Default is "cv".}
+\item{method}{The resampling method to be used. Options include
+"boot", "boot632", "optimism_boot", "boot_all", "cv",
+"repeatedcv", "LOOCV", "LGOCV", "none", "oob", "adaptive_cv",
+"adaptive_boot", and "adaptive_LGOCV". Default is "cv".}
 
-\item{mlList}{A vector of machine learning methods to be used.
-Options include "rf" (random forest) and "xgbTree" (XGBoost tree).
-Default is c("rf", "xgbTree").}
+\item{mlList}{A vector of machine learning methods to be used. Some
+options include "rf" (random forest) and "xgbTree" (XGBoost
+tree). Default is c("rf", "xgbTree").}
 }
 \value{
-A list containing:
-\item{mean_performance}{A data frame of average performance metrics (e.g., R-squared) for each model.}
-\item{best_model}{The name of the best-performing model based on the highest R-squared value.}
+A list containing: \item{mean_performance}{A data frame of
+  average performance metrics (e.g., R-squared) for each model.}
+  \item{best_model}{The name of the best-performing model based on
+  the highest R-squared value.}
 }
 \description{
-This function evaluates multiple machine learning models using specified
-resampling methods and returns the best performing model based on R-squared.
+This function evaluates multiple machine learning models using a
+specified resampling methods and returns the best performing model
+based on highest out-of-fold R-squared.
 }
 \examples{
 # Load necessary libraries

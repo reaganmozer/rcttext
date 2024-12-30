@@ -7,15 +7,22 @@
 get.sub(coded, data)
 }
 \arguments{
-\item{coded}{A binary vector indicating which samples are part of the subset (1) and which are not (0).}
+\item{coded}{A binary vector indicating which samples are part of
+the subset (1) and which are not (0).}
 
-\item{data}{A data frame containing the observed data. It must include the columns `Z` (treatment indicator), `Yobs` (observed outcome), and `pi.hat` (sampling probabilities).}
+\item{data}{A data frame containing the observed data. It must
+include the columns `Z` (treatment indicator), `Yobs` (observed
+outcome), and `pi.hat` (sampling probabilities).}
 }
 \value{
-A data frame containing the estimated treatment effect (`est`), the standard error (`SE`), and the estimated standard error (`SEhat`).
+A data frame containing the estimated treatment effect
+  (`est`), the standard error (`SE`), and the estimated standard
+  error (`SEhat`).
 }
 \description{
-This function calculates the subset estimator for a given dataset. It estimates the treatment effect and its variance based on a subset of the data.
+This function calculates the subset estimator for a given dataset.
+It estimates the treatment effect and its variance based on a
+subset of the data.
 }
 \examples{
 # Example usage with hypothetical data

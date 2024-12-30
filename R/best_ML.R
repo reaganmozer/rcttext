@@ -1,26 +1,29 @@
 
 #' best_ML Function
 #'
-#' This function evaluates multiple machine learning models using specified
-#' resampling methods and returns the best performing model based on R-squared.
+#' This function evaluates multiple machine learning models using a
+#' specified resampling methods and returns the best performing model
+#' based on highest out-of-fold R-squared.
 #'
 #' @param features A data frame of feature variables.
-#' @param outcome A vector or data frame containing the outcome variable.
-#' @param num Either the number of folds (for cross-validation) or
-#'   the number of resampling iterations.
-#' @param por The proportion of data to be used for training,
-#'   with the remainder used for testing (default is 0.8).
-#' @param method The resampling method to be used. Options include "boot",
-#'   "boot632", "optimism_boot", "boot_all", "cv", "repeatedcv", "LOOCV",
-#'   "LGOCV", "none", "oob", "adaptive_cv", "adaptive_boot", and "adaptive_LGOCV".
-#'   Default is "cv".
-#' @param mlList A vector of machine learning methods to be used.
-#'   Options include "rf" (random forest) and "xgbTree" (XGBoost tree).
-#'   Default is c("rf", "xgbTree").
+#' @param outcome A vector or data frame containing the outcome
+#'   variable.
+#' @param num Either the number of folds (for cross-validation) or the
+#'   number of resampling iterations.
+#' @param por The proportion of data to be used for training, with the
+#'   remainder used for testing (default is 0.8).
+#' @param method The resampling method to be used. Options include
+#'   "boot", "boot632", "optimism_boot", "boot_all", "cv",
+#'   "repeatedcv", "LOOCV", "LGOCV", "none", "oob", "adaptive_cv",
+#'   "adaptive_boot", and "adaptive_LGOCV". Default is "cv".
+#' @param mlList A vector of machine learning methods to be used. Some
+#'   options include "rf" (random forest) and "xgbTree" (XGBoost
+#'   tree). Default is c("rf", "xgbTree").
 #'
-#' @return A list containing:
-#' \item{mean_performance}{A data frame of average performance metrics (e.g., R-squared) for each model.}
-#' \item{best_model}{The name of the best-performing model based on the highest R-squared value.}
+#' @return A list containing: \item{mean_performance}{A data frame of
+#'   average performance metrics (e.g., R-squared) for each model.}
+#'   \item{best_model}{The name of the best-performing model based on
+#'   the highest R-squared value.}
 #'
 #' @import caret
 #' @import caretEnsemble
@@ -64,7 +67,9 @@ best_ML <- function( features, outcome, num = 3, por = 0.8,
                                             "adaptive_boot", "adaptive_LGOCV" ))
 
   # Combine outcome and features
-  df <- cbind( features, outcome )
+  features = as.data.frame(features)
+  df = features
+  df$outcome = outcome
 
   # Create data partition
   id <- caret::createDataPartition( y = df$outcome,
@@ -102,15 +107,21 @@ best_ML <- function( features, outcome, num = 3, por = 0.8,
   ML_Results <- df_results %>% dplyr::select( -Resample )
 
   # Calculate average performance for each model
-  average_performances <- caretEnsemble::aggregate( . ~ Model, data = ML_Results, mean )
+  average_performances <- ML_Results %>%
+    group_by( Model ) %>%
+    summarise( RMSE = mean( RMSE ),
+               MAE = mean( MAE ),
+               Rsquared = mean( Rsquared ) )
+  # TODO: What package does 'aggregate' come from?  The following doesn't work:
+  # aggregate( . ~ Model, data = ML_Results, mean )
 
   # Identify the best model based on R-squared
   best_model <- average_performances[which.max(average_performances$Rsquared), "Model"]
 
+  # Save the results in a list
   result <- list(
     mean_performance = average_performances,
     best_model = best_model)
-  # Save the results in a list
 
   return(result)
 }

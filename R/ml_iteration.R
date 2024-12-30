@@ -1,38 +1,38 @@
 
 #' Iterative Machine Learning with Performance Tracking
 #'
-#' Trains a machine learning model multiple times, splitting the data into
-#' training and testing sets for each iteration. Evaluates and stores
-#' performance metrics for each run, allowing for assessment of model
-#' stability and generalization.
+#' Trains a machine learning model multiple times, splitting the data
+#' into training and testing sets for each iteration. Evaluates and
+#' stores performance metrics for each run, allowing for assessment of
+#' model stability and generalization.
 #'
 #' @param x Matrix or data frame of predictor variables.
 #' @param y Vector of outcome variable (continuous or categorical).
 #' @param n_iteration Number of iterations (defaults to 1).
-#' @param training_portion Proportion of data used for training (defaults to 0.8).
-#' @param trCon Train control object for caret (optional).
-#' @param preProc Preprocessing methods for caret (optional).
-#' @param n.tune Number of tuning parameter combinations (optional).
+#' @param training_portion Proportion of data used for training
+#'   (defaults to 0.8).
 #' @param model Machine learning model to use (e.g., "rf", "xgbTree").
-#' @param grid Tuning grid for hyperparameter search (optional).
-#' @param outcome Type of outcome variable: "continuous" or "categorical".
+#' @param outcome Type of outcome variable: "continuous" or
+#'   "categorical".  If NULL will select based on number of unique
+#'   values in outcome.
 #' @return A list containing results for each iteration, including:
 #'   * The trained model (`ML_model`)
 #'   * Predicted values on the test set (`predicted_values`)
 #'   * Values of predictor variables on the test set (`test_values`)
 #'   * Performance metrics (RMSE, MAE, correlation, R-squared for continuous;
-#'     confusion matrix, accuracy, kappa values for categorical)
+#'   confusion matrix, accuracy, kappa values for categorical)
 #'   * Execution time for each iteration (`execution_time`)
 #'
-#' @details This function provides a standardized way to train and evaluate models
-#' within a larger analysis, facilitating comparison across different models,
-#' hyperparameters, or repeated runs. It handles both regression (continuous outcome)
-#' and classification (categorical outcome) problems, providing appropriate evaluation
-#' metrics for each.
+#' @details This function provides a standardized way to train and
+#'   evaluate models within a larger analysis, facilitating comparison
+#'   across different models, hyperparameters, or repeated runs. It
+#'   handles both regression (continuous outcome) and classification
+#'   (categorical outcome) problems, providing appropriate evaluation
+#'   metrics for each.
 #'
 #' @seealso
 #'  * `ML_iterations`: A wrapper function for performing multiple iterations of
-#'  `ML_iteration` with different training proportions.
+#' `ML_iteration` with different training proportions.
 #'  * `caret::train`: The underlying function used for model training.
 #'
 #' @examples
@@ -91,15 +91,26 @@ ML_iteration = function ( x,
                           y,
                           n_iteration = 1,
                           training_portion = 0.8,
-                          trCon = NULL,
-                          preProc = NULL,
-                          n.tune = NULL,
                           model = NULL,
-                          grid = NULL,
-                          outcome = NULL) {
+                          outcome = NULL,
+                          ... ) {
 
   doParallel::registerDoParallel(parallel::detectCores()-1)
   foreach::getDoParWorkers()
+
+  if ( is.null( outcome ) ) {
+    if ( length( unique( y ) ) < 4 ) {
+      outcome = "categorical"
+      if ( is.null( model ) ) {
+        model = "rf"
+      }
+    } else {
+      outcome = "continuous"
+      if ( is.null( model ) ) {
+        model = "rf"
+      }
+    }
+  }
 
   training_index = caret::createDataPartition( y,
                                                times = n_iteration,
@@ -127,10 +138,7 @@ ML_iteration = function ( x,
       mod = caret::train( x = x_train,
                           y = y_train,
                           method = model,
-                          preProcess = preProc,
-                          tuneLength = n.tune,
-                          trControl = trCon,
-                          tuneGrid = grid )
+                          ... )
 
       predicted_values <- predict(mod, x_test)
       test_x_values <- x_test
@@ -160,10 +168,7 @@ ML_iteration = function ( x,
       mod = caret::train( x = x_train,
                           y = y_train,
                           method = model,
-                          preProcess = preProc,
-                          tuneLength = n.tune,
-                          trControl = trCon,
-                          tuneGrid = grid )
+                          ... )
 
       predicted_values <- predict(mod, x_test)
       test_x_values <- x_test
@@ -197,6 +202,11 @@ ML_iteration = function ( x,
   return(results_list)
 }
 
+
+
+
+
+
 #' Iterative Machine Learning Across Multiple Training Set Sizes
 #'
 #' Trains and evaluates a specified machine learning model iteratively,
@@ -213,12 +223,9 @@ ML_iteration = function ( x,
 #' for each training set size (defaults to 1).
 #' @param training_portions A vector of proportions (between 0 and 1)
 #' indicating the fraction of data to be used for training in each iteration.
-#' @param trCon Train control object for caret (optional).
-#' @param preProc Preprocessing methods for caret (optional).
-#' @param n.tune Number of tuning parameter combinations (optional).
 #' @param model Machine learning model to use (e.g., "rf", "xgbTree").
-#' @param grid Tuning grid for hyperparameter search (optional).
 #' @param outcome Type of outcome variable: "continuous" or "categorical".
+#' @param ... Extra arguments to be passed to carat.
 #'
 #' @return A nested list, where the first level corresponds
 #' to different training set sizes and the second level contains results
@@ -301,12 +308,9 @@ ML_iterations = function ( x,
                            y,
                            n_iteration = 1,
                            training_portions = 0.8,
-                           trCon = NULL,
-                           preProc = NULL,
-                           n.tune = NULL,
                            model = NULL,
-                           grid = NULL,
-                           outcome = NULL
+                           outcome = NULL,
+                           ...
 ) {
 
   percentages <- training_portions
@@ -322,7 +326,8 @@ ML_iterations = function ( x,
                                          preProc = preProc,
                                          n.tune = n.tune,
                                          model = model,
-                                         outcome = outcome )
+                                         outcome = outcome,
+                                         ... )
   }
   # Return the list of results
   return(results)

@@ -10,12 +10,9 @@ ML_iteration(
   y,
   n_iteration = 1,
   training_portion = 0.8,
-  trCon = NULL,
-  preProc = NULL,
-  n.tune = NULL,
   model = NULL,
-  grid = NULL,
-  outcome = NULL
+  outcome = NULL,
+  ...
 )
 
 ML_iterations(
@@ -23,12 +20,9 @@ ML_iterations(
   y,
   n_iteration = 1,
   training_portions = 0.8,
-  trCon = NULL,
-  preProc = NULL,
-  n.tune = NULL,
   model = NULL,
-  grid = NULL,
-  outcome = NULL
+  outcome = NULL,
+  ...
 )
 }
 \arguments{
@@ -39,19 +33,14 @@ ML_iterations(
 \item{n_iteration}{Number of times to repeat model training and evaluation
 for each training set size (defaults to 1).}
 
-\item{training_portion}{Proportion of data used for training (defaults to 0.8).}
-
-\item{trCon}{Train control object for caret (optional).}
-
-\item{preProc}{Preprocessing methods for caret (optional).}
-
-\item{n.tune}{Number of tuning parameter combinations (optional).}
+\item{training_portion}{Proportion of data used for training
+(defaults to 0.8).}
 
 \item{model}{Machine learning model to use (e.g., "rf", "xgbTree").}
 
-\item{grid}{Tuning grid for hyperparameter search (optional).}
-
 \item{outcome}{Type of outcome variable: "continuous" or "categorical".}
+
+\item{...}{Extra arguments to be passed to carat.}
 
 \item{training_portions}{A vector of proportions (between 0 and 1)
 indicating the fraction of data to be used for training in each iteration.}
@@ -62,7 +51,7 @@ A list containing results for each iteration, including:
   * Predicted values on the test set (`predicted_values`)
   * Values of predictor variables on the test set (`test_values`)
   * Performance metrics (RMSE, MAE, correlation, R-squared for continuous;
-    confusion matrix, accuracy, kappa values for categorical)
+  confusion matrix, accuracy, kappa values for categorical)
   * Execution time for each iteration (`execution_time`)
 
 A nested list, where the first level corresponds
@@ -77,10 +66,10 @@ Each iteration's results include:
   * Execution time for each iteration (`execution_time`)
 }
 \description{
-Trains a machine learning model multiple times, splitting the data into
-training and testing sets for each iteration. Evaluates and stores
-performance metrics for each run, allowing for assessment of model
-stability and generalization.
+Trains a machine learning model multiple times, splitting the data
+into training and testing sets for each iteration. Evaluates and
+stores performance metrics for each run, allowing for assessment of
+model stability and generalization.
 
 Trains and evaluates a specified machine learning model iteratively,
 using different proportions of the dataset for training in each iteration.
@@ -90,11 +79,12 @@ tuning can be optionally incorporated to optimize the model within each
 iteration.
 }
 \details{
-This function provides a standardized way to train and evaluate models
-within a larger analysis, facilitating comparison across different models,
-hyperparameters, or repeated runs. It handles both regression (continuous outcome)
-and classification (categorical outcome) problems, providing appropriate evaluation
-metrics for each.
+This function provides a standardized way to train and
+  evaluate models within a larger analysis, facilitating comparison
+  across different models, hyperparameters, or repeated runs. It
+  handles both regression (continuous outcome) and classification
+  (categorical outcome) problems, providing appropriate evaluation
+  metrics for each.
 
 This function helps you understand how your chosen model performs with
 varying amounts of training data, which is crucial for assessing its
@@ -205,7 +195,7 @@ random_forest_Scores = ML_iterations (x = X, y = Y,
 }
 \seealso{
 * `ML_iterations`: A wrapper function for performing multiple iterations of
- `ML_iteration` with different training proportions.
+`ML_iteration` with different training proportions.
  * `caret::train`: The underlying function used for model training.
 
 * `ML_iteration`: The core function performing a single iteration of model

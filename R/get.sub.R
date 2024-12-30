@@ -1,12 +1,19 @@
 
 #' Calculate Subset Estimator
 #'
-#' This function calculates the subset estimator for a given dataset. It estimates the treatment effect and its variance based on a subset of the data.
+#' This function calculates the subset estimator for a given dataset.
+#' It estimates the treatment effect and its variance based on a
+#' subset of the data.
 #'
-#' @param coded A binary vector indicating which samples are part of the subset (1) and which are not (0).
-#' @param data A data frame containing the observed data. It must include the columns `Z` (treatment indicator), `Yobs` (observed outcome), and `pi.hat` (sampling probabilities).
+#' @param coded A binary vector indicating which samples are part of
+#'   the subset (1) and which are not (0).
+#' @param data A data frame containing the observed data. It must
+#'   include the columns `Z` (treatment indicator), `Yobs` (observed
+#'   outcome), and `pi.hat` (sampling probabilities).
 #'
-#' @return A data frame containing the estimated treatment effect (`est`), the standard error (`SE`), and the estimated standard error (`SEhat`).
+#' @return A data frame containing the estimated treatment effect
+#'   (`est`), the standard error (`SE`), and the estimated standard
+#'   error (`SEhat`).
 #'
 #' @import dplyr
 #' @export

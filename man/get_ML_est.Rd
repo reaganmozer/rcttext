@@ -2,16 +2,20 @@
 % Please edit documentation in R/get_ML_est.R
 \name{get_ML_est}
 \alias{get_ML_est}
-\title{Get All Estimates: Nominal (Oracle), Subset, Synthetic, and Model-Assisted}
+\title{Get All Estimates: Nominal (Oracle), Subset, Synthetic, and
+Model-Assisted}
 \usage{
 get_ML_est(dat, coded, yhat)
 }
 \arguments{
-\item{dat}{A data frame containing the full dataset, including both observed and predicted outcomes.}
+\item{dat}{A data frame containing the full dataset, including both
+observed and predicted outcomes.}
 
-\item{coded}{A binary vector indicating which documents have been hand-coded (1 for coded, 0 for not coded).}
+\item{coded}{A binary vector indicating which documents have been
+hand-coded (1 for coded, 0 for not coded).}
 
-\item{yhat}{A numeric vector of predicted outcomes for the full dataset.}
+\item{yhat}{A numeric vector of predicted outcomes for the full
+dataset.}
 }
 \value{
 A data frame containing the following estimates:
@@ -23,7 +27,8 @@ A data frame containing the following estimates:
 }
 }
 \description{
-This function calculates and returns four types of estimates: nominal (oracle), subset, synthetic, and model-assisted.
+This function calculates and returns four types of estimates:
+nominal (oracle), subset, synthetic, and model-assisted.
 }
 \examples{
 # Example usage with hypothetical data

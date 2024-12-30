@@ -1,11 +1,16 @@
 
-#' Get All Estimates: Nominal (Oracle), Subset, Synthetic, and Model-Assisted
+#' Get All Estimates: Nominal (Oracle), Subset, Synthetic, and
+#' Model-Assisted
 #'
-#' This function calculates and returns four types of estimates: nominal (oracle), subset, synthetic, and model-assisted.
+#' This function calculates and returns four types of estimates:
+#' nominal (oracle), subset, synthetic, and model-assisted.
 #'
-#' @param dat A data frame containing the full dataset, including both observed and predicted outcomes.
-#' @param coded A binary vector indicating which documents have been hand-coded (1 for coded, 0 for not coded).
-#' @param yhat A numeric vector of predicted outcomes for the full dataset.
+#' @param dat A data frame containing the full dataset, including both
+#'   observed and predicted outcomes.
+#' @param coded A binary vector indicating which documents have been
+#'   hand-coded (1 for coded, 0 for not coded).
+#' @param yhat A numeric vector of predicted outcomes for the full
+#'   dataset.
 #'
 #' @return A data frame containing the following estimates:
 #' \itemize{
