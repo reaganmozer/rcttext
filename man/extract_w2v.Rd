@@ -12,7 +12,9 @@ extract_w2v(x, meta = NULL, model = NULL)
 documents.}
 
 \item{meta}{Dataframe corresponding to the corpus x.  If passed,
-and non-NULL, all features will be added to this dataframe.}
+and non-NULL, all generated features will be added to this
+dataframe.  If NULL, a dataframe of just the features will be
+returned.}
 
 \item{model}{User-specified model object pointing to a custom
 pre-trained embedding model, represented as a matrix or data frame where the

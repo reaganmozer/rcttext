@@ -251,6 +251,43 @@ rtbl
 # We also have a plot of differential use.
 plot_ccs( rtbl )
 
-
 ```
 
+
+
+# Using machine learning to predict outcomes is easy! 
+
+We can fit a collection of machine learners on pilot data, and then generate new features on our target data.  Here we will reuse our dataset as "pilot" data to illustrate the package:
+
+First on our pilot data we fit our model:
+
+```{r}
+# making some 'pilot' data
+ data( toy_reads )
+  tt = dplyr::bind_rows(toy_reads, toy_reads, toy_reads )
+  tt$text = paste( tt$text,
+                   sample( c("dog", "cat", "pig", "cow", tt$text), nrow(tt), replace = TRUE ),
+                   sample( c( "cow", "pig", "cat", "goat"), nrow(tt), replace = TRUE ), sep = " " )
+  tt$Q2 = tt$Q2 + rnorm( nrow(tt) )
+  pilot_feat = generate_features( tt$text, lex = TRUE, sent = FALSE )
+
+    mods <- train_models( pilot_feat, tt$Q2, methods = "small",
+                          include_BART = FALSE, verbose = FALSE )
+    names(mods)
+```
+
+We now have a set of models.  We can apply them to our target data.  We don't clean our features because we don't want to throw out any features we used in the original data predictions:
+
+```{r}
+feats = generate_features( toy_reads$text, lex = TRUE, sent = FALSE, clean_features = FALSE )
+
+preds = add_predictions( mods, feats, toy_reads[ "more" ] )
+head( preds )
+```
+
+We can then see if there is impact on our predicted values:
+```{r}
+estimatr::lm_robust( mod_stack ~ more, data = preds )
+```
+
+If the models were trained on pilot data, this inference is valid.  

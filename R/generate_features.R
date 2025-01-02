@@ -6,20 +6,26 @@
 #' array of linguistic and syntactic indices, available text analysis
 #' dictionaries, and pre-trained embedding models to all documents.
 #'
+#' Note: This function does not work with a dataframe with one row.
+#' The 'meta' argument requires a dataframe with at least two rows.
+
 #' @importFrom quanteda tokens
-#' @importFrom quanteda.textstats textstat_lexdiv textstat_readability textstat_entropy
+#' @importFrom quanteda.textstats textstat_lexdiv textstat_readability
+#'   textstat_entropy
 #'
 #' @param x A \link{corpus} object or character vector of text
 #'   documents.
 #' @param meta Dataframe corresponding to the corpus x.  If passed,
-#'   and non-NULL, all features will be added to this dataframe.
+#'   and non-NULL, all generated features will be added to this
+#'   dataframe.  If NULL, a dataframe of just the features will be
+#'   returned.
 #' @param lex Logical, indicating whether to compute lexical indices
 #'   including measures of lexical diversity, readability, and entropy
 #' @param sent Logical, indicating whether to compute sentiment
 #'   analysis features from available dictionaries
-#' @param clean_features TRUE means implement cleaning step where we
-#'   drop features with no variation and collinear features. (This
-#'   happens before any term generation features are added.)
+#' @param clean_features TRUE means implement cleaning step where
+#'   features with no variation and collinear features are dropped.
+#'   (This happens before any term generation features are added.)
 #' @param ld character vector defining lexical diversity measures to
 #'   compute; see \link{quanteda.textstats::textstat_lexdiv()}
 #' @param read character vector defining readability measures to
@@ -28,20 +34,21 @@
 #'   features based on document-level frequency (case-insensitive).
 #'   Not cleaned by clean_features.
 #' @param preProc Named list of arguments passed to
-#'   \code{caret::preProcess()} for applying pre-processing
+#'   \code{clean_features()} for applying pre-processing
 #'   transformations across the set of text features (e.g., removing
 #'   collinear features).
-#' @param ignore List of column names to ignore when simplifying
-#'   (e.g., ID column and other columns that should be preserved).
+#' @param ignore List of column names (features) to ignore when
+#'   simplifying (e.g., ID column and other columns that should be
+#'   preserved).  All columns in meta, if meta is non-null, will be
+#'   added to this list automatically.
 #' @param ... (optional) additional arguments passed to
 #'   \link{quanteda::tokens()} for text pre-processing.
-#' @return A data.frame of available text features, one row per document,
-#'   one column per feature.
+#' @return A data.frame of available text features, one row per
+#'   document, one column per feature (with additional columns from
+#'   meta, if meta is not NULL).
 #'
 #' @examples
 #'
-#' # Note: This function does not work with the dataframe with 1 object.
-#' # The 'meta' argument requires a dataframe with at least two rows
 #'
 #' ## Example 1: Basic Feature Generation
 #'
@@ -92,14 +99,17 @@ generate_features <- function(x,
                               preProc=list(uniqueCut=1, freqCut=99, cor=0.95, remove.lc=TRUE),
                               verbose = FALSE,
                               ignore = NULL,
-                              ...){
+                              ...) {
 
-  ignore = "s_id"
+  stopifnot( is.character(x) || is.quanteda.corpus(x) )
+
   if ( !is.null(meta) ) {
     stopifnot( is.data.frame(meta) )
-    ignore = colnames(meta)
-  } else {
-    meta = data.frame( s_id=1:length(x) )
+    if ( is.null( ignore ) ) {
+      ignore = colnames(meta)
+    } else {
+      ignore = unique( c( ignore, colnames(meta) ) )
+    }
   }
 
   # utility to add on features
@@ -197,8 +207,8 @@ generate_features <- function(x,
     #all.feats = clean_features( all.feats,
                                 #ignore = ignore,
                                 #preProc = preProc )
-    all.feats = do.call(rcttext::clean_features, c(list(meta=all.feats, ignore=ignore),
-                                          preProc))
+    all.feats = do.call(rcttext::clean_features, c( list(meta=all.feats, ignore=ignore),
+                                          preProc) )
   }
 
   if (!is.null(terms)){

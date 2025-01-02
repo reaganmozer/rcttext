@@ -20,7 +20,9 @@ generate_distance_features(
 documents.}
 
 \item{meta}{Dataframe corresponding to the corpus x.  If passed,
-and non-NULL, all features will be added to this dataframe.}
+and non-NULL, all generated features will be added to this
+dataframe.  If NULL, a dataframe of just the features will be
+returned.}
 
 \item{reference_docs}{A list of reference documents to compare
 corpus against.  Will end up with one distance feature per
