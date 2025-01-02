@@ -105,12 +105,12 @@ dim( features )
 ```
 
 You can add in w2v embeddings
-```{r}
-glove.50d = textdata::embedding_glove6b(dimensions = 50)
+```{r, eval=T}
+# glove.50d = textdata::embedding_glove6b(dimensions = 50)
 
 features = extract_w2v( clean_text(toy_reads$text),
                         meta = features,
-                        model = glove.50d )
+                        model = mini_glove)
 dim( features )
 ```
 

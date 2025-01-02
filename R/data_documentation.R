@@ -1,4 +1,18 @@
 
+#' MORE study science essays
+#'
+#' Dataset consisting of a sample of 40 student essays and corresponding human-coded quality scores (sampled from MORE study pilot data)
+#' @keywords data
+#' @format A \link{data.frame} with 40 observations of 4 variables:
+#' \describe{
+#' \item{studentid}{Student identification number}
+#' \item{text}{Student generated essay text}
+#' \item{treatment}{MORE intervention treatment indicator (0=Control, 1=Treatment)}
+#' \item{score}{Human-coded writing quality score}
+#' }
+#'
+"student_essays"
+
 
 
 #' Dataset with 20 essays from READS pilot data
