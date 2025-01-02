@@ -61,7 +61,7 @@ clean_features <- function( meta, ignore = NULL,
                        "'." ) )
       set_aside = set_aside[!is.na(set_aside)]
     }
-    meta_aside = meta[,set_aside]
+    meta_aside = meta[,set_aside, drop=FALSE]
     meta = as.matrix( meta[,-set_aside] )
   } else {
     meta = as.matrix( meta )

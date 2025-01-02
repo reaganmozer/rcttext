@@ -121,10 +121,19 @@ train_models = function( x, y, n.tune=3, preProc=NULL, bounds=NULL,
 #' @param meta Dataframe to add predictions to.  If NULL, just return
 #'   a dataframe of the predictions.
 #' @export
-add_predictions = function( models, features, meta = NULL, prefix = "mod_" ) {
+generate_predictions = function( models, features, meta = NULL, prefix = "mod_" ) {
   stopifnot( is.list(models) )
   stopifnot( is.matrix(features) || is.data.frame(features) )
   stopifnot( is.null(meta) || is.data.frame(meta) )
+
+  cc = complete.cases(features) & !apply(features, 1, function(x) any(is.infinite(x)))
+  if ( any(!cc) ) {
+    warning( paste0( "Skipping ", sum(!cc), " rows with missing or infinite values." ) )
+    features = features[cc,]
+    if ( !is.null( meta ) ) {
+      meta = meta[cc,]
+    }
+  }
 
   pds = predict( models, features ) %>%
     dplyr::bind_cols() %>%

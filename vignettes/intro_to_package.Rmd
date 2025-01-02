@@ -3,10 +3,12 @@ title: "Introduction to the `rcttext` package"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{intro_to_package}
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
 ---
-
+  
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -14,11 +16,11 @@ knitr::opts_chunk$set(
 )
 library(tidyverse)
 knitr::opts_chunk$set(echo = TRUE,
-          fig.width = 5,
-          fig.height = 3,
-          out.width = "75%",
-           message = FALSE,
-          fig.align = "center")
+                      fig.width = 5,
+                      fig.height = 3,
+                      out.width = "75%",
+                      message = FALSE,
+                      fig.align = "center")
 options(list(dplyr.summarise.inform = FALSE))
 theme_set( theme_classic() )
 
@@ -50,48 +52,24 @@ table( toy_reads$more )
 table( toy_reads$Q1 )
 ```
 
-
-
 ## The pipeline
+
+We now provide a demo of rcttext package, based on replication files for the READS
+project. Note we use the tidyverse.
 
 For a given corpus with two subgroups
 
- * Generate features (`generate_features()`)
- * Run impact analysis on the set of features. (Need to move script 4 from reads replication into package.)  Make plots ()
- * Run CCS to compare the two groups (and make plots and tables of the selected phrases).
- 
+* Generate features (`generate_features()`)
+* Run impact analysis on the set of features. (Need to move script 4 from reads replication into package.)  Make plots ()
+* Run CCS to compare the two groups (and make plots and tables of the selected phrases).
+
+This is what we illustrate in this vignette.
 If you have human coding, then you can use our package to enhance precision
 
- * Fit machine learner to predict given outcome
- * Fit the model and calculate the model assisted impact estimate (`get_ests()`)
- 
- 
- 
-## Text preprocessing
+* Fit machine learner to predict given outcome
+* Fit the model and calculate the model assisted impact estimate (`get_ests()`)
 
-
-```{r}
-
-# Demo of rcttext package, based on replication files for the READS
-# project
-
-
-library( tidyverse )
-library( rcttext )
-data( "toy_reads" )
-
-```
-
-
-We start with a simple dataset of a bunch of text documents which
-are the outputs of an experiment. The `more` column is an indicator
-of whether a student received treatment or not.  Q1 and Q2 are
-human-scored assessments of the text.
-
-```{r}
-names( toy_reads )
-nrow( toy_reads )
-```
+We do not illustrate this part of the package here (it is currently under more active development).
 
 # Generating features is easy! 
 
@@ -100,6 +78,7 @@ the raw text
 
 ```{r}
 features <- generate_features( toy_reads$text )
+dim( features )
 
 # You can tweak how it runs
 features <- generate_features( toy_reads$text,
@@ -132,8 +111,7 @@ glove.50d = textdata::embedding_glove6b(dimensions = 50)
 features = extract_w2v( clean_text(toy_reads$text),
                         meta = features,
                         model = glove.50d )
-colnames( features )
-
+dim( features )
 ```
 
 # You can make features which are distances to reference documents
@@ -147,7 +125,7 @@ features = generate_distance_features( clean_text(toy_reads$text),
                                        features,
                                        ref_docs,
                                        method="cosine" )
-colnames( features )
+tail( colnames( features ) )
 summary( features$doc_1 )
 summary( features$doc_2 )
 
@@ -161,9 +139,10 @@ manage loading in the results and merging it into your feature set
 
 # Estimating impacts on features is easy! 
 
-```{r impact_estimation}
-features = clean_features( features, ignore = c( "s_id", "monkeys" ) )
+```{r impact_estimation, warnings=FALSE}
+features_clean = clean_features( features, ignore = c( "monkeys" ) )
 dim( features )
+dim( features_clean )
 
 all <- impacts_on_features( features,
                             ignore = "s_id",
@@ -196,7 +175,7 @@ plot_textfx( all_sub, main = "Impact Plot" )
 
 # Comparing word usages across groups is easy! 
 
-```{r}
+```{r, warnings=FALSE}
 
 cwords_untaught <- c("potential", "unique", "camouflage", "diversity", "carnivore",
                      "hypothesis", "organism", "trait", "reptile")
@@ -263,31 +242,34 @@ First on our pilot data we fit our model:
 
 ```{r}
 # making some 'pilot' data
- data( toy_reads )
-  tt = dplyr::bind_rows(toy_reads, toy_reads, toy_reads )
-  tt$text = paste( tt$text,
-                   sample( c("dog", "cat", "pig", "cow", tt$text), nrow(tt), replace = TRUE ),
-                   sample( c( "cow", "pig", "cat", "goat"), nrow(tt), replace = TRUE ), sep = " " )
-  tt$Q2 = tt$Q2 + rnorm( nrow(tt) )
-  pilot_feat = generate_features( tt$text, lex = TRUE, sent = FALSE )
+data( toy_reads )
+tt = dplyr::bind_rows(toy_reads, toy_reads, toy_reads )
+tt$text = paste( tt$text,
+                 sample( c("dog", "cat", "pig", "cow", tt$text), nrow(tt), replace = TRUE ),
+                 sample( c( "cow", "pig", "cat", "goat"), nrow(tt), replace = TRUE ), sep = " " )
+tt$Q2 = tt$Q2 + rnorm( nrow(tt) )
+pilot_feat = generate_features( tt$text, lex = TRUE, sent = FALSE )
 
-    mods <- train_models( pilot_feat, tt$Q2, methods = "small",
-                          include_BART = FALSE, verbose = FALSE )
-    names(mods)
+mods <- train_models( pilot_feat, tt$Q2, methods = "small",
+                      include_BART = FALSE, verbose = FALSE )
+names(mods)
 ```
 
 We now have a set of models.  We can apply them to our target data.  We don't clean our features because we don't want to throw out any features we used in the original data predictions:
 
 ```{r}
-feats = generate_features( toy_reads$text, lex = TRUE, sent = FALSE, clean_features = FALSE )
-
-preds = add_predictions( mods, feats, toy_reads[ "more" ] )
+feats = generate_features( toy_reads$text, lex = TRUE, sent = FALSE, clean_features = FALSE ) %>%
+  dplyr::select( all_of( colnames( pilot_feat ) ) )
+preds = generate_predictions( mods, feats, toy_reads[ "more" ] )
 head( preds )
 ```
 
 We can then see if there is impact on our predicted values:
 ```{r}
-estimatr::lm_robust( mod_stack ~ more, data = preds )
+estimatr::lm_robust( mod_stack ~ more, data = preds ) %>%
+  broom::tidy() %>%
+  dplyr::select( -outcome ) %>%
+  knitr::kable(digits=2)
 ```
 
 If the models were trained on pilot data, this inference is valid.  

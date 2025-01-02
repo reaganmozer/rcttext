@@ -28,7 +28,7 @@ test_that("training machine learners works", {
   class( dplyr::bind_cols( pds ) )
 
   tt$text = NULL
-  pds = add_predictions( mods, feat, tt )
+  pds = generate_predictions( mods, feat, tt )
   head( pds )
   expect_true( !is.null( pds$mod_glmnet ) )
 })
