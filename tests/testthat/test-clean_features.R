@@ -13,7 +13,7 @@ test_that("clean_features works", {
                                 read = c("ELF", "meanWordSyllables"),
                                 verbose = FALSE )
 
-  afc = clean_features( all.feats )
+  expect_warning( afc <- clean_features( all.feats ) )
   ncol( all.feats )
   ncol( afc )
   expect_true( ncol( afc ) < ncol( all.feats ) )

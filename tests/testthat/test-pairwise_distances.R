@@ -10,8 +10,10 @@ test_that("pairwise distance calculations work", {
   expect_equal( nrow(tmp), 4*3 )
 
 
-  corp1 = c( "harry harry dog", "dog cat pig", "dog cat", "hamster bunny", "house car moose", "zebra giraffe", "a", "b", "c", "d", "e", "f", "g" )
-  corp0 = c( "dog cat pig", "zebra big cat fierce cat stripy cat elephant", "tiger lion leapord jaguar" )
+  corp1 = c( "harry harry dog", "dog cat pig", "dog cat", "hamster bunny",
+             "house car moose", "zebra giraffe", "a", "b", "c", "d", "e", "f", "g" )
+  corp0 = c( "dog cat pig", "zebra big cat fierce cat stripy cat elephant",
+             "tiger lion leapord jaguar" )
   #debug( pairwise_distances )
   pd <- pairwise_distances( corp1, corp0, wide=TRUE )
   pd

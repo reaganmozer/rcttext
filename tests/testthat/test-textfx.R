@@ -44,4 +44,14 @@ test_that("estimating impacts on text features works", {
 
   # We got massive precision gains in X1 due to controlling for baseline
   expect_true(rs2$std.error[[1]] < 0.5 * rs$std.error[[1]] )
+
+
+  # Checking plotting function
+  plt <- plot_textfx( rs2, standardize = FALSE )
+  expect_equal( plt, 0 )
+
+  plt2 <- plot_textfx( rs, standardize = FALSE )
+  expect_equal( plt2, 0 )
+
+
 })

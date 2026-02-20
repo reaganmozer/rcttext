@@ -104,6 +104,7 @@ impacts_on_features <- function( data,
   return(res)
 }
 
+
 standardize_impact_table <- function( res, standardize = TRUE ) {
 
   # If already standardized, bail

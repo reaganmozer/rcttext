@@ -3,7 +3,7 @@ test_that("machine learning works", {
 
   data( toy_reads )
 
-  features = generate_features( toy_reads$text )
+  expect_warning( features <- generate_features( toy_reads$text ) )
 
   bml <- best_ML( features, toy_reads$Q2, method = "cv" )
   bml$mean_performance
