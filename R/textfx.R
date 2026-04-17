@@ -153,8 +153,14 @@ simple_RCT_analysis <- function( feature, formula, data, ... ) {
 
   mod = estimatr::lm_robust( formula, data=data, ... )
 
+  coef_name = first_var
+  if ( is.character( data[[first_var]] ) || is.factor( data[[first_var]] ) ) {
+    ff = factor( data[[first_var]] )
+    coef_name = paste0( first_var,  levels(ff)[2] )
+  }
+
   res <- broom::tidy( mod ) %>%
-    filter( term == first_var ) %>%
+    filter( term == coef_name ) %>%
     dplyr::select( -term, -outcome )
 
   # Add in subgroup means and standard deviations, if binary treatment

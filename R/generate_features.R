@@ -88,18 +88,19 @@
 #'
 #' @export
 
-generate_features <- function(x,
-                              meta = NULL,
-                              lex=TRUE, sent=TRUE,
-                              ld="all",
-                              clean_features = TRUE,
-                              read=c( 'ARI','Coleman','DRP','ELF',
-                                      'Flesch','Flesch.Kincaid','meanWordSyllables'),
-                              terms = NULL,
-                              preProc=list(uniqueCut=1, freqCut=99, cor=0.95, remove.lc=TRUE),
-                              verbose = FALSE,
-                              ignore = NULL,
-                              ...) {
+generate_features <- function( x,
+                               meta = NULL,
+                               lex = TRUE,
+                               sent = TRUE,
+                               ld = "all",
+                               clean_features = TRUE,
+                               read = c( 'ARI','Coleman','DRP','ELF',
+                                         'Flesch','Flesch.Kincaid','meanWordSyllables'),
+                               terms = NULL,
+                               preProc = list(uniqueCut=1, freqCut=99, cor=0.95, remove.lc=TRUE),
+                               verbose = FALSE,
+                               ignore = NULL,
+                               ... ) {
 
   stopifnot( is.character(x) || is.quanteda.corpus(x) )
 
@@ -168,7 +169,7 @@ generate_features <- function(x,
     names(dics)=c("AFINN","ANEW","sentiws")
     val = do.call(cbind, lapply(dics, function(x) {
       quanteda.sentiment::textstat_valence(tok.clean, dictionary=x)[,2] }
-      ) )
+    ) )
 
     LSD_dict <- quanteda::data_dictionary_LSD2015
     quanteda.sentiment::polarity(LSD_dict) <- list(
@@ -205,10 +206,10 @@ generate_features <- function(x,
 
   if ( !is.null( all.feats ) && clean_features ) {
     #all.feats = clean_features( all.feats,
-                                #ignore = ignore,
-                                #preProc = preProc )
+    #ignore = ignore,
+    #preProc = preProc )
     all.feats = do.call(rcttext::clean_features, c( list(meta=all.feats, ignore=ignore),
-                                          preProc) )
+                                                    preProc) )
   }
 
   if (!is.null(terms)){
