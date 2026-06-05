@@ -2,3 +2,7 @@
 ^LICENSE\.md$
 ^data-raw$
 ^.*\.Rproj$
+^\.positai$
+^\.claude$
+^doc$
+^Meta$

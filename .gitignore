@@ -2,7 +2,9 @@
 .DS_Store
 .Rhistory
 luke/
-inst/doc
 rcttext.Rproj
 .gitattributes
 Rplots.pdf
+.positai
+/doc/
+/Meta/

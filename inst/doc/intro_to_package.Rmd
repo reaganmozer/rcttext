@@ -1,0 +1,275 @@
+---
+title: "Introduction to the `rcttext` package"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{intro_to_package}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+  
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(tidyverse)
+knitr::opts_chunk$set(echo = TRUE,
+                      fig.width = 5,
+                      fig.height = 3,
+                      out.width = "75%",
+                      message = FALSE,
+                      fig.align = "center")
+options(list(dplyr.summarise.inform = FALSE))
+theme_set( theme_classic() )
+
+```
+
+In this vignette, we will introduce the `rcttext` package, which provides a set of functions for working with text data in R, when that text is an outcome in a randomized controlled trial. The package includes functions for cleaning and preprocessing text data, as well as for applying text mining techniques such as sentiment analysis and topic modeling.
+
+
+As this package is under active development, we recommend installing the development version from GitHub using the `devtools` package:
+
+```{r install, eval=FALSE}
+devtools::install_github("https://github.com/reaganmozer/rcttext/")
+```
+
+Once installed, you can load the package using the following command:
+
+```{r setup, message=FALSE}
+library(rcttext)
+```
+
+## Overview of the package
+
+We provide a small fake dataset to demonstrate the package's capabilities. The dataset contains a column of text data, `text`, and a column of treatment indicators, `more`. The `text` column contains text data that we will use to demonstrate the package's functions.  The Q1 and Q2 are human-coded evaluations (grades) for the text.
+
+```{r}
+data( "toy_reads" )
+names( toy_reads )
+table( toy_reads$more )
+table( toy_reads$Q1 )
+```
+
+## The pipeline
+
+We now provide a demo of rcttext package, based on replication files for the READS
+project. Note we use the tidyverse.
+
+For a given corpus with two subgroups
+
+* Generate features (`generate_features()`)
+* Run impact analysis on the set of features. (Need to move script 4 from reads replication into package.)  Make plots ()
+* Run CCS to compare the two groups (and make plots and tables of the selected phrases).
+
+This is what we illustrate in this vignette.
+If you have human coding, then you can use our package to enhance precision
+
+* Fit machine learner to predict given outcome
+* Fit the model and calculate the model assisted impact estimate (`get_ests()`)
+
+We do not illustrate this part of the package here (it is currently under more active development).
+
+# Generating features is easy! 
+
+We first use the generate_features to make a simple feature set from
+the raw text
+
+```{r}
+features <- generate_features( toy_reads$text )
+dim( features )
+
+# You can tweak how it runs
+features <- generate_features( toy_reads$text,
+                               sent = TRUE,
+                               clean_features = FALSE,
+                               terms = c( "xxx", "monkeys" ),
+                               read = c("Flesch","Flesch.Kincaid", "ARI",
+                                        "ELF", "meanWordSyllables"),
+                               ld=c("TTR","R","K"),
+                               ignore="s_id",
+                               verbose = TRUE )
+
+
+dim( features )
+head( features )
+
+summary( features$monkeys )
+class( features )
+
+# And then drop colinear features, etc
+features_clean = clean_features( features, ignore = "monkeys" )
+class( features_clean )
+dim( features )
+```
+
+You can add in w2v embeddings
+```{r, eval=T}
+# glove.50d = textdata::embedding_glove6b(dimensions = 50)
+
+features = extract_w2v( clean_text(toy_reads$text),
+                        meta = features,
+                        model = mini_glove)
+dim( features )
+```
+
+# You can make features which are distances to reference documents
+
+```{r}
+ref_docs = c( "Monkeys should live! Trees and birds are also important.  Trees should not be cut down as they are houses for animals",
+              "Unrelated gibberish is not good" )
+ref_docs = clean_text( ref_docs )
+
+features = generate_distance_features( clean_text(toy_reads$text),
+                                       features,
+                                       ref_docs,
+                                       method="cosine" )
+tail( colnames( features ) )
+summary( features$doc_1 )
+summary( features$doc_2 )
+
+```
+
+You can also include features generated from a few third party
+software packages (LIWC and TACCO) using some functions that manage
+saving the data in the format those tools need, and functions that
+manage loading in the results and merging it into your feature set
+
+
+# Estimating impacts on features is easy! 
+
+```{r impact_estimation, warnings=FALSE}
+features_clean = clean_features( features, ignore = c( "monkeys" ) )
+dim( features )
+dim( features_clean )
+
+all <- impacts_on_features( features,
+                            ignore = "s_id",
+                            meta = toy_reads,
+                            formula = ~ more,
+                            mcp = "fdr" )
+
+# one row per feature of analysis
+head(all)
+
+# All the p-values (unadjusted)
+ggplot( all, aes( p.value ) ) +
+  geom_dotplot( binwidth = 0.025 ) +
+  expand_limits( x = 0 ) +
+  theme_minimal()
+
+
+# All the p-values (adjusted)
+ggplot( all, aes( p.adj ) ) +
+  geom_dotplot( binwidth = 0.025 ) +
+  expand_limits( x = 0 ) +
+  theme_minimal()
+
+head( all )
+
+all_sub = filter( all, p.value <= 0.20 )
+plot_textfx( all_sub, main = "Impact Plot" )
+```
+
+
+# Comparing word usages across groups is easy! 
+
+```{r, warnings=FALSE}
+
+cwords_untaught <- c("potential", "unique", "camouflage", "diversity", "carnivore",
+                     "hypothesis", "organism", "trait", "reptile")
+cwords_taught <- c("survive", "species", "behavior", "advantage", "adaptation",
+                   "habitat", "physical_feature", "extinct", "fossil", "brutal",
+                   "evidence", "theory", "hunter", "paleontologist")
+monkey <- c( "monkey", "monkeys" )
+
+# This function returns a line of statistics for term frequencies
+r1 <- textfx_terms( toy_reads$text, toy_reads$more, cwords_untaught )
+r2 <- textfx_terms( toy_reads$text, toy_reads$more, cwords_taught )
+r3 <- textfx_terms( toy_reads$text, toy_reads$more, monkey )
+bind_rows( untaught = r1, taught = r2, monkey = r3, .id="group" ) %>%
+  dplyr::select( -termfreq_1, -termfreq_0, -LL, -UL ) %>%
+  knitr::kable( digits=2 )
+
+monkey = str_detect( toy_reads$text, "monkey" )
+table( has_monkey = monkey, toy_reads$more )
+
+```
+
+# CCS tools are easy! 
+
+```{r}
+# We can fit a series of related CCS models and look for stability
+# across models of different phrases.
+toy_reads$clean_text = clean_text( toy_reads$text )
+m1 = ccs_tuned_textreg( corpus = toy_reads$clean_text,
+                        Z = toy_reads$more,
+                        R = 20 )
+m2 = ccs_tuned_textreg( corpus = toy_reads$clean_text,
+                        Z = toy_reads$more,
+                        R = 20,
+                        Lq = 4 )
+m3 = textreg::textreg( corpus = toy_reads$clean_text,
+                       labeling = 2*toy_reads$more - 1,
+                       verbosity = 0,
+                       banned = c( "monkeys", "apes", "love"),
+                       C = 4 )
+
+mods = list( classic = m1, L4 = m2, curated = m3 )
+
+# We have two different kinds of tables of results, that aggregate
+# across models
+ctbl <- ccs_list_table( mods )
+ctbl
+
+rtbl <- ccs_result_table( mods, toy_reads$clean_text,
+                          toy_reads$more )
+rtbl
+
+# We also have a plot of differential use.
+plot_ccs( rtbl )
+
+```
+
+
+
+# Using machine learning to predict outcomes is easy! 
+
+We can fit a collection of machine learners on pilot data, and then generate new features on our target data.  Here we will reuse our dataset as "pilot" data to illustrate the package:
+
+First on our pilot data we fit our model:
+
+```{r}
+# making some 'pilot' data
+data( toy_reads )
+tt = dplyr::bind_rows(toy_reads, toy_reads, toy_reads )
+tt$text = paste( tt$text,
+                 sample( c("dog", "cat", "pig", "cow", tt$text), nrow(tt), replace = TRUE ),
+                 sample( c( "cow", "pig", "cat", "goat"), nrow(tt), replace = TRUE ), sep = " " )
+tt$Q2 = tt$Q2 + rnorm( nrow(tt) )
+pilot_feat = generate_features( tt$text, lex = TRUE, sent = FALSE )
+
+mods <- train_models( pilot_feat, tt$Q2, methods = "small",
+                      include_BART = FALSE, verbose = FALSE )
+names(mods)
+```
+
+We now have a set of models.  We can apply them to our target data.  We don't clean our features because we don't want to throw out any features we used in the original data predictions:
+
+```{r}
+feats = generate_features( toy_reads$text, lex = TRUE, sent = FALSE, clean_features = FALSE ) %>%
+  dplyr::select( all_of( colnames( pilot_feat ) ) )
+preds = generate_predictions( mods, feats, toy_reads[ "more" ] )
+head( preds )
+```
+
+We can then see if there is impact on our predicted values:
+```{r}
+estimatr::lm_robust( mod_stack ~ more, data = preds ) %>%
+  broom::tidy() %>%
+  dplyr::select( -outcome ) %>%
+  knitr::kable(digits=2)
+```
+
+If the models were trained on pilot data, this inference is valid.  
