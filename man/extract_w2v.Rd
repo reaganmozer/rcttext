@@ -9,7 +9,9 @@ extract_w2v(x, meta = NULL, model = NULL)
 }
 \arguments{
 \item{x}{A \link{corpus} object or character vector of text
-documents.}
+documents.  This should NOT be a cleaned corpus as many of the
+features need punctuation and other elements of the raw text to
+be calculated.}
 
 \item{meta}{Dataframe corresponding to the corpus x.  If passed,
 and non-NULL, all generated features will be added to this

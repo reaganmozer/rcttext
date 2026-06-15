@@ -22,7 +22,9 @@ generate_features(
 }
 \arguments{
 \item{x}{A \link{corpus} object or character vector of text
-documents.}
+documents.  This should NOT be a cleaned corpus as many of the
+features need punctuation and other elements of the raw text to
+be calculated.}
 
 \item{meta}{Dataframe corresponding to the corpus x.  If passed,
 and non-NULL, all generated features will be added to this
@@ -75,7 +77,8 @@ dictionaries, and pre-trained embedding models to all documents.
 }
 \details{
 Note: This function does not work with a dataframe with one row.
-The 'meta' argument requires a dataframe with at least two rows.
+The 'meta' argument requires a dataframe with at least two rows
+(i.e. you need at least two documents)
 }
 \examples{
 
@@ -93,7 +96,7 @@ df = data.frame(
 feats1 = generate_features( df$text,
                             meta = df,
                             clean_features = FALSE )
-
+dim( feats1 )
 
 ## Example 2: Feature Generation with Example Data and Customization
 
@@ -105,6 +108,7 @@ feats2 = generate_features( toy_reads$text,
                             meta=toy_reads,
                             clean_features = FALSE,
                             ignore = "ID" )
+dim( feats2 )
 
 # Generate preliminary text features,
 # simplifying the set of features and specifying sent, read, ld
@@ -115,5 +119,6 @@ feats3 = generate_features( toy_reads$text, meta=toy_reads,
                             ld=c("TTR","R","K"),
                             ignore=c("ID"),
                             verbose = TRUE )
+dim( feats3 )
 
 }

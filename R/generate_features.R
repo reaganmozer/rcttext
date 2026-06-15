@@ -7,14 +7,18 @@
 #' dictionaries, and pre-trained embedding models to all documents.
 #'
 #' Note: This function does not work with a dataframe with one row.
-#' The 'meta' argument requires a dataframe with at least two rows.
-
+#' The 'meta' argument requires a dataframe with at least two rows
+#' (i.e. you need at least two documents)
+#'
+#'
 #' @importFrom quanteda tokens
 #' @importFrom quanteda.textstats textstat_lexdiv textstat_readability
 #'   textstat_entropy
 #'
 #' @param x A \link{corpus} object or character vector of text
-#'   documents.
+#'   documents.  This should NOT be a cleaned corpus as many of the
+#'   features need punctuation and other elements of the raw text to
+#'   be calculated.
 #' @param meta Dataframe corresponding to the corpus x.  If passed,
 #'   and non-NULL, all generated features will be added to this
 #'   dataframe.  If NULL, a dataframe of just the features will be
@@ -63,7 +67,7 @@
 #' feats1 = generate_features( df$text,
 #'                             meta = df,
 #'                             clean_features = FALSE )
-#'
+#' dim( feats1 )
 #'
 #' ## Example 2: Feature Generation with Example Data and Customization
 #'
@@ -75,6 +79,7 @@
 #'                             meta=toy_reads,
 #'                             clean_features = FALSE,
 #'                             ignore = "ID" )
+#' dim( feats2 )
 #'
 #' # Generate preliminary text features,
 #' # simplifying the set of features and specifying sent, read, ld
@@ -85,6 +90,7 @@
 #'                             ld=c("TTR","R","K"),
 #'                             ignore=c("ID"),
 #'                             verbose = TRUE )
+#' dim( feats3 )
 #'
 #' @export
 
@@ -130,7 +136,7 @@ generate_features <- function( x,
   clean = clean_text(raw)
 
   # Check pre-processed texts for empty strings
-  has_empties <- any(raw=='')
+  has_empties <- any(clean=='')
   if (has_empties) warning('After pre-processing, texts contain empty strings. This may result in clean_features dropping some features unexpectedly. To avoid this, remove empty texts before running this function. (Note that raw texts may not appear empty; pre-process your texts with clean_text()).')
 
   tok.clean = quanteda::tokens(clean)

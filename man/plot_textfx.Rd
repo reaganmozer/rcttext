@@ -4,10 +4,18 @@
 \alias{plot_textfx}
 \title{Plot the results from an impact analysis with text outcomes}
 \usage{
-plot_textfx(out, alpha = 0.05, cols = FALSE, group = TRUE, xlim = NULL, ...)
+plot_textfx(
+  out,
+  alpha = 0.05,
+  cols = FALSE,
+  group = TRUE,
+  standardize = TRUE,
+  xlim = NULL,
+  ...
+)
 }
 \arguments{
-\item{out}{a model object output from \code{estimate_impacts()}}
+\item{out}{a model object output from \code{impacts_on_features()}}
 
 \item{alpha}{the threshold for determining statistical significance}
 
@@ -17,12 +25,26 @@ negative impacts, blue for positive impacts)}
 \item{group}{(optional) should effects be grouped by category
 (e.g., higher-level summary measures, linguistic features, etc.)}
 
+\item{standardize}{(optional) should effects be standardized by the
+pooled standard deviation of the feature across treatment and
+control groups.  Can be TRUE, FALSE, or "pool".}
+
 \item{xlim}{(optional) bounds for x-axis}
 
 \item{...}{additional arguments passed to plot}
+
+\item{feature}{Name of the column of feature names.}
 }
 \description{
 This function provides a visualization of the set of textual
 features found to differ systematically between treatment and
 control groups.
+}
+\details{
+The `out` object should have columns named `feature`, `estimate`,
+`conf.low`, `conf.high`, and `p.adj` (or `p.value`) for the
+estimated effect, confidence interval bounds, and adjusted p-value
+for each feature.  If the `standardize` argument is not FALSE, the
+function will standardize estimates based on columns of `Grp_0_sd`
+and `Grp_1_sd` (if pooling).
 }
